@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Utilities;
 
 public class Startup
@@ -9,11 +10,11 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
-        //var configuration = new ConfigurationBuilder()
-        //    .AddUserSecrets<Gov.Cscp.VictimServices.Public.Startup>()
-        //    .AddEnvironmentVariables()
-        //    .Build();
-        //services.AddSingleton<IConfiguration>(configuration);
+        var configuration = new ConfigurationBuilder()
+            .AddUserSecrets<CASInterfaceService.Startup>()
+            .AddEnvironmentVariables()
+            .Build();
+        services.AddSingleton<IConfiguration>(configuration);
 
         //services.AddAutoMapperMappings();
 
