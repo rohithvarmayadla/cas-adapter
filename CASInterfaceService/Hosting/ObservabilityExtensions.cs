@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
 using System;
 using System.Net.Http;
@@ -35,32 +37,42 @@ public static class ObservabilityExtensions
               .WriteTo.Console(outputTemplate: logOutputTemplate);
         });
 
-        //if (hostingContext.HostingEnvironment.IsDevelopment())
-        //{
-        //    logger.WriteTo.Console();
-        //}
-        //else
-        //{
-        //    loggerConfiguration.WriteTo.Console(formatter: new RenderedCompactJsonFormatter());
-        //    var splunkUrl = hostingContext.Configuration.GetSplunkUrl();
-        //    var splunkToken = hostingContext.Configuration.GetSplunkToken();
-        //    if (string.IsNullOrWhiteSpace(splunkToken) || string.IsNullOrWhiteSpace(splunkUrl))
-        //    {
-        //        Log.Error($"Splunk logging sink is not configured properly, check SPLUNK_TOKEN and SPLUNK_URL env vars");
-        //    }
-        //    else
-        //    {
-        //        loggerConfiguration
-        //            .WriteTo.EventCollector(
-        //                splunkHost: splunkUrl,
-        //                eventCollectorToken: splunkToken,
-        //                messageHandler: new HttpClientHandler
-        //                {
-        //                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-        //                },
-        //                renderTemplate: false);
-        //    }
-        //}
+        var loggerConfiguration = (LoggerConfiguration)Log.Logger;
+        loggerConfiguration
+                        .ReadFrom.Configuration(builder.Configuration)
+                        //.Enrich.WithMachineName()
+                        //.Enrich.WithProcessId()
+                        //.Enrich.WithProcessName()
+                        //.Enrich.FromLogContext()
+                        //.Enrich.WithExceptionDetails()
+                        .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName);
+
+        if (builder.Environment.IsDevelopment())
+        {
+            loggerConfiguration.WriteTo.Console();
+        }
+        else
+        {
+            loggerConfiguration.WriteTo.Console(formatter: new RenderedCompactJsonFormatter());
+            //var splunkUrl = builder.Configuration.GetSplunkUrl();
+            //var splunkToken = builder.Configuration.GetSplunkToken();
+            //if (string.IsNullOrWhiteSpace(splunkToken) || string.IsNullOrWhiteSpace(splunkUrl))
+            //{
+            //    Log.Error($"Splunk logging sink is not configured properly, check SPLUNK_TOKEN and SPLUNK_URL env vars");
+            //}
+            //else
+            //{
+            //    loggerConfiguration
+            //        .WriteTo.EventCollector(
+            //            splunkHost: splunkUrl,
+            //            eventCollectorToken: splunkToken,
+            //            messageHandler: new HttpClientHandler
+            //            {
+            //                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            //            },
+            //            renderTemplate: false);
+            //}
+        }
 
         return logger;
     }
