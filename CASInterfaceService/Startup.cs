@@ -15,16 +15,26 @@ namespace CASInterfaceService
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IConfiguration Configuration { get; }
+        public IWebHostEnvironment CurrentEnvironment { get; }
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            CurrentEnvironment = environment;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // configuration and app settings - binded using user secrets
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                //.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddUserSecrets<Startup>()
+                .AddEnvironmentVariables()
+                .Build();
+            services.AddSingleton<IConfiguration>(configuration);
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -32,6 +42,7 @@ namespace CASInterfaceService
                 options.MinimumSameSitePolicy = SameSiteMode.None;
 
             });
+            services.ConfigureObservability(configuration, CurrentEnvironment);
 
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();

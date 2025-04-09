@@ -2,13 +2,14 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
 using System;
 using System.Net.Http;
 using System.Reflection;
 using System.Security.Claims;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting; // Add this using directive
 
 public static class ObservabilityExtensions
 {
@@ -18,63 +19,65 @@ public static class ObservabilityExtensions
     /// Configures observability instruments like logging to the web application and return an initial logger
     /// </summary>
     /// <returns>A logger that can be used during starting up the web application</returns>
-    public static ILogger ConfigureWebApplicationObservability(this WebApplicationBuilder builder)
+    public static IServiceCollection ConfigureObservability(this IServiceCollection builder, IConfiguration configuration, IWebHostEnvironment environment)
     {
         Serilog.Debugging.SelfLog.Enable(Console.Error);
-        var logger = CreateBootstrapLogger(builder.Configuration);
+        var logger = CreateBootstrapLogger(configuration);
 
         var serviceName = Assembly.GetEntryAssembly()!.GetName().Name ?? throw new InvalidOperationException("Could not establish the service name");
 
         //builder.Host.UseSerilog((context, services, configuration) => configuration
         //            .ReadFrom.Configuration(context.Configuration)
         //            .ReadFrom.Services(services), preserveStaticLogger: true);
-        builder.Services.AddSerilog((services, config) =>
+        builder.AddSerilog((services, config) =>
         {
             config
-              .ReadFrom.Configuration(builder.Configuration)
+              .ReadFrom.Configuration(configuration)
               .ReadFrom.Services(services)
               .Enrich.WithProperty("service", serviceName)
               .WriteTo.Console(outputTemplate: logOutputTemplate);
         });
 
-        var loggerConfiguration = (LoggerConfiguration)Log.Logger;
-        loggerConfiguration
-                        .ReadFrom.Configuration(builder.Configuration)
-                        //.Enrich.WithMachineName()
-                        //.Enrich.WithProcessId()
-                        //.Enrich.WithProcessName()
-                        //.Enrich.FromLogContext()
-                        //.Enrich.WithExceptionDetails()
-                        .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName);
+        // No other changes are needed in the file.
+        //var loggerConfiguration = (LoggerConfiguration)logger;
+        //loggerConfiguration
+        //                .ReadFrom.Configuration(configuration)
+        //                //.Enrich.WithMachineName()
+        //                //.Enrich.WithProcessId()
+        //                //.Enrich.WithProcessName()
+        //                //.Enrich.FromLogContext()
+        //                //.Enrich.WithExceptionDetails()
+        //                .Enrich.WithProperty("Environment", environment.EnvironmentName)
+        //                ;
 
-        if (builder.Environment.IsDevelopment())
-        {
-            loggerConfiguration.WriteTo.Console();
-        }
-        else
-        {
-            loggerConfiguration.WriteTo.Console(formatter: new RenderedCompactJsonFormatter());
-            //var splunkUrl = builder.Configuration.GetSplunkUrl();
-            //var splunkToken = builder.Configuration.GetSplunkToken();
-            //if (string.IsNullOrWhiteSpace(splunkToken) || string.IsNullOrWhiteSpace(splunkUrl))
-            //{
-            //    Log.Error($"Splunk logging sink is not configured properly, check SPLUNK_TOKEN and SPLUNK_URL env vars");
-            //}
-            //else
-            //{
-            //    loggerConfiguration
-            //        .WriteTo.EventCollector(
-            //            splunkHost: splunkUrl,
-            //            eventCollectorToken: splunkToken,
-            //            messageHandler: new HttpClientHandler
-            //            {
-            //                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-            //            },
-            //            renderTemplate: false);
-            //}
-        }
+        //if (appSettings.Environment.IsDevelopment())
+        //{
+        //    loggerConfiguration.WriteTo.Console();
+        //}
+        //else
+        //{
+        //    loggerConfiguration.WriteTo.Console(formatter: new RenderedCompactJsonFormatter());
+        //    var splunkUrl = appSettings.Splunk.Url;
+        //    var splunkToken = appSettings.Splunk.Token;
+        //    if (string.IsNullOrWhiteSpace(splunkToken) || string.IsNullOrWhiteSpace(splunkUrl))
+        //    {
+        //        Log.Error($"Splunk logging sink is not configured properly, check SPLUNK_TOKEN and SPLUNK_URL env vars");
+        //    }
+        //    else
+        //    {
+        //        loggerConfiguration
+        //            .WriteTo.EventCollector(
+        //                splunkHost: splunkUrl,
+        //                eventCollectorToken: splunkToken,
+        //                messageHandler: new HttpClientHandler
+        //                {
+        //                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+        //                },
+        //                renderTemplate: false);
+        //    }
+        //}
 
-        return logger;
+        return builder;
     }
 
     /// <summary>
@@ -92,9 +95,9 @@ public static class ObservabilityExtensions
         });
     }
 
-    private static ILogger CreateBootstrapLogger(IConfiguration configuration)
+    private static Serilog.ILogger CreateBootstrapLogger(IConfiguration configuration)
     {
         Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).WriteTo.Console(outputTemplate: logOutputTemplate).CreateBootstrapLogger();
-        return (ILogger)Log.Logger;
+        return Log.Logger;
     }
 }
