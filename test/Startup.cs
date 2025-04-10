@@ -11,7 +11,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         var configuration = new ConfigurationBuilder()
-            .AddUserSecrets<CASInterfaceService.Startup>()
+            .AddUserSecrets<AppSettings>()
             .AddEnvironmentVariables()
             .Build();
         services.AddSingleton<IConfiguration>(configuration);

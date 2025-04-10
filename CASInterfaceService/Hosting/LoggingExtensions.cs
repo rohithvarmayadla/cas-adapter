@@ -26,8 +26,7 @@ public static class LoggingExtensions
             config
               .ReadFrom.Configuration(appSettings.Configuration)
               .ReadFrom.Services(services)
-              .Enrich.WithProperty("service", serviceName)
-              .WriteTo.Console(outputTemplate: appSettings.LoggingOutputFormat);
+              .Enrich.WithProperty("service", serviceName);
         });
 
         return services;
@@ -37,21 +36,11 @@ public static class LoggingExtensions
     {
         builder.UseSerilog((hostingContext, loggerConfiguration) =>
         {
-            // No other changes are needed in the file.
             loggerConfiguration
-                            .ReadFrom.Configuration(appSettings.Configuration)
-                            //.Enrich.WithMachineName()
-                            //.Enrich.WithProcessId()
-                            //.Enrich.WithProcessName()
-                            //.Enrich.FromLogContext()
-                            //.Enrich.WithExceptionDetails()
-                            .Enrich.WithProperty("Environment", appSettings.Environment.EnvironmentName);
+                .ReadFrom.Configuration(appSettings.Configuration)
+                .Enrich.WithProperty("Environment", appSettings.Environment.EnvironmentName);
 
-            if (appSettings.Environment.IsDevelopment())
-            {
-                loggerConfiguration.WriteTo.Console();
-            }
-            else
+            if (!appSettings.Environment.IsDevelopment()) 
             {
                 loggerConfiguration.WriteTo.Console(formatter: new RenderedCompactJsonFormatter());
                 var splunkUrl = appSettings.Splunk.Url;
