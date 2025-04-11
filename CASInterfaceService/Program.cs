@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using System;
@@ -40,42 +41,7 @@ builder.Host.UseSplunkSerilogPipe(appSettings);
 // security
 services.AddCorsPolicy(builder.Configuration.GetSection("cors").Get<CorsSettings>());
 
-var defaultScheme = "Bearer_OR_SSO";
-
-services.AddAuthentication(options =>
-{
-    options.DefaultScheme = defaultScheme;
-    options.DefaultChallengeScheme = defaultScheme;
-})
-// JWT for Service Account    
-//.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-//{
-//    options.MetadataAddress = configuration.GetValue<string>("jwt:metadataAddress");
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateAudience = true,
-//        ValidateIssuer = true,
-//        RequireSignedTokens = true,
-//        RequireAudience = true,
-//        RequireExpirationTime = true,
-//        ValidateLifetime = true,
-//        ClockSkew = TimeSpan.FromSeconds(60),
-//        //NameClaimType = ClaimTypes.Upn,
-//        //RoleClaimType = ClaimTypes.Role,
-//        ValidateActor = true,
-//        ValidateIssuerSigningKey = true,
-//    };
-
-//    configuration.GetSection("jwt").Bind(options);
-
-
-//#pragma warning disable CS8604 // Possible null reference argument.
-//#pragma warning disable CS8602 // Dereference of a possibly null reference.
-
-//    options.Validate();
-
-//})
-//JWT token handling - SSO for BCeID login
+services.AddAuthentication()
 .AddJwtBearer("jwt", options =>
 {
     options.BackchannelHttpHandler = new HttpClientHandler
@@ -131,9 +97,9 @@ services.AddAuthentication(options =>
          OnTokenValidated = async ctx =>
          {
              await Task.CompletedTask;
-             //var logger = ctx.HttpContext.RequestServices.GetRequiredService<ITelemetryProvider>().Get<OAuth2IntrospectionEvents>();
-             //var userInfo = ctx.Principal?.FindFirst("userInfo");
-             //logger.LogDebug("{0}", userInfo);
+             var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger>();
+             var userInfo = ctx.Principal?.FindFirst("userInfo");
+             logger.LogDebug("{0}", userInfo);
          },
          OnAuthenticationFailed = async ctx =>
          {
@@ -143,49 +109,20 @@ services.AddAuthentication(options =>
          }
      };
 
-             })
-             // parse JWT token
-             .AddPolicyScheme(defaultScheme, defaultScheme, options =>
-              {
-                  options.ForwardDefaultSelector = context =>
-                  {
-                      //string? authorization = context.Request.Headers[HeaderNames.Authorization];
+             });
 
-                      //if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
-                      //{
-                      //    var token = authorization["Bearer ".Length..].Trim();
-                      //    var jwtHandler = new JwtSecurityTokenHandler();
+services.AddAuthorization(options =>
+{
+    options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
+    {
+        policy
+        .RequireAuthenticatedUser()
+        .AddAuthenticationSchemes("jwt");
+        //.RequireClaim("scope", appSettings.Auth.Jwt.Scope);
+    });
 
-                      //    if (jwtHandler.CanReadToken(token))
-                      //    {
-                      //        JwtSecurityToken jwtToken = jwtHandler.ReadJwtToken(token);
-                      //        var identityProviderClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "aud");
-                      //        if (identityProviderClaim != null && identityProviderClaim.Value.Equals(configuration.GetValue<string>("SSO:jwt:audience"), StringComparison.InvariantCultureIgnoreCase))
-                      //        {
-                      //            return "SSO";
-                      //        }
-                      //        else
-                      //            return JwtBearerDefaults.AuthenticationScheme;
-                      //    }
-                      //    return JwtBearerDefaults.AuthenticationScheme;
-                      //}
-                      //return JwtBearerDefaults.AuthenticationScheme;
-                      return "jwt";
-                  };
-                  options.Validate();
-              });
-
-//services.AddAuthorization(options =>
-//{
-//    options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
-//    {
-//        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-//            .RequireAuthenticatedUser()
-//            .RequireClaim("user_info");
-//    });
-//    var ssoPolicyBuilder = new AuthorizationPolicyBuilder("SSO");
-//    options.AddPolicy("OnlySSO", ssoPolicyBuilder.RequireAuthenticatedUser().Build());
-//});
+    options.DefaultPolicy = options.GetPolicy(JwtBearerDefaults.AuthenticationScheme) ?? null!;
+});
 
 services.AddSerilog(appSettings);
 
