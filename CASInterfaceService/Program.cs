@@ -1,16 +1,12 @@
 ﻿using IdentityModel.AspNetCore.OAuth2Introspection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -49,7 +45,6 @@ services.AddAuthentication()
         ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
     };
     configuration.GetSection("auth:jwt").Bind(options);
-    //Debug.WriteLine($"JWT Authentication; Audience: {options.Audience}");
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateAudience = false,
@@ -71,7 +66,6 @@ services.AddAuthentication()
             foreach (var claim in claims)
             {
                 //logger.LogInformation($"JWT token validated. Claim: {claim.Type}: {claim.Value}");
-                //Debug.WriteLine($"JWT token validated. Claim: {claim.Type}: {claim.Value}");
             }
         },
         OnAuthenticationFailed = async ctx =>
@@ -79,9 +73,8 @@ services.AddAuthentication()
             await Task.CompletedTask;
             //var clientId = oidcConfig["clientId"];
             //var issuer = oidcConfig["issuer"];
-            //var logger1 = ctx.HttpContext.RequestServices.GetRequiredService<ITelemetryProvider>().Get<JwtBearerEvents>();
-            //var logger2 = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Configuration>>();
-            //logger2.LogError(ctx.Exception, $"JWT authentication failed: clientId={clientId}, issuer={issuer}, jwt:authority={options.Authority}");
+            //var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Configuration>>();
+            //logger.LogError(ctx.Exception, $"JWT authentication failed: clientId={clientId}, issuer={issuer}, jwt:authority={options.Authority}");
         }
     };
 })
@@ -107,8 +100,7 @@ services.AddAuthentication()
              //logger.LogError(ctx?.Result?.Failure, "Introspection authantication failed");
          }
      };
-
-             });
+});
 
 services.AddAuthorization(options =>
 {
