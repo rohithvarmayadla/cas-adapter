@@ -7,6 +7,7 @@ public class AppSettings
     public readonly IConfiguration Configuration;
     public readonly IWebHostEnvironment Environment;
     public readonly string LoggingOutputFormat;
+    public readonly Auth Auth;
 
     public AppSettings(IConfiguration configuration, IWebHostEnvironment environment)
     {
@@ -17,6 +18,7 @@ public class AppSettings
             Url = configuration["SPLUNK_URL"],
             Token = configuration["SPLUNK_TOKEN"]
         };
+        Auth = configuration.GetSection("auth").Get<Auth>();
         LoggingOutputFormat = configuration["LOGGING_OUTPUT"];
     }
 }
@@ -25,4 +27,16 @@ public class Splunk
 {
     public string Url { get; set; }
     public string Token { get; set; }
+}
+
+public class Auth
+{
+    public JwtSection Jwt { get; set; }
+    //public Oidc Oidc { get; set; }
+
+    public class JwtSection
+    {
+        public string Authority { get; set; }
+        public string Scope { get; set; }
+    }
 }

@@ -66,12 +66,11 @@ services.AddAuthentication()
         OnTokenValidated = async ctx =>
         {
             await Task.CompletedTask;
-            //var logger1 = ctx.HttpContext.RequestServices.GetRequiredService<ITelemetryProvider>().Get<JwtBearerEvents>();
-            //var logger2 = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Configuration>>();
+            //var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Configuration>>();
             var claims = ctx.Principal.Claims;
             foreach (var claim in claims)
             {
-                //logger2.LogInformation($"JWT token validated. Claim: {claim.Type}: {claim.Value}");
+                //logger.LogInformation($"JWT token validated. Claim: {claim.Type}: {claim.Value}");
                 //Debug.WriteLine($"JWT token validated. Claim: {claim.Type}: {claim.Value}");
             }
         },
@@ -131,11 +130,11 @@ services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
 var app = builder.Build();
-app.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
 
 // security
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers().RequireAuthorization();
 app.UseDisableHttpVerbsMiddleware(app.Configuration.GetValue("DisabledHttpVerbs", string.Empty));
 app.UseCsp();
 app.UseSecurityHeaders();
