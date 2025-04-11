@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-
-public class AppSettings
+﻿public class AppSettings
 {
     public readonly Splunk Splunk;
     public readonly IConfiguration Configuration;

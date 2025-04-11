@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Utilities;
-
-public class CasApTransactionInvoiceTests(ICasHttpClient casHttpClient, IConfiguration configuration)
+﻿public class CasApTransactionInvoiceTests(ICasHttpClient casHttpClient, IConfiguration configuration)
 {
     // TODO this is correctly configured to use coast utilities and should use this solution cas-interface-service.api instead
     [Fact]
