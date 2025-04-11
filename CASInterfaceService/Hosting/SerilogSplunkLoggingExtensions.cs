@@ -1,21 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
-using Serilog;
-using Serilog.Formatting.Compact;
-using System;
-using System.Net.Http;
-using System.Reflection;
-using System.Security.Claims;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Hosting;
-
-public static class LoggingExtensions
+﻿public static class SerilogSplunkLoggingExtensions
 {
     /// <summary>
     /// Configures observability instruments like logging to the web application and return an initial logger
     /// </summary>
     /// <returns>A logger that can be used during starting up the web application</returns>
-    public static IServiceCollection AddSerilog(this IServiceCollection services, AppSettings appSettings)
+    public static IServiceCollection AddLogging(this IServiceCollection services, AppSettings appSettings)
     {
         Serilog.Debugging.SelfLog.Enable(Console.Error);
         CreateBootstrapLogger(appSettings);
@@ -32,7 +21,7 @@ public static class LoggingExtensions
         return services;
     }
 
-    public static void UseSplunkSerilogPipe(this ConfigureHostBuilder builder, AppSettings appSettings)
+    public static void UseLogging(this ConfigureHostBuilder builder, AppSettings appSettings)
     {
         builder.UseSerilog((hostingContext, loggerConfiguration) =>
         {
@@ -84,7 +73,7 @@ public static class LoggingExtensions
     {
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(appSettings.Configuration)
-            .WriteTo.Console(outputTemplate: appSettings.LoggingOutputFormat)
+            .WriteTo.Console()
             .CreateBootstrapLogger();
     }
 }
