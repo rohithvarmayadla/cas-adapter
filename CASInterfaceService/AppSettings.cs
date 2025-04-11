@@ -3,7 +3,6 @@
     public readonly Splunk Splunk;
     public readonly IConfiguration Configuration;
     public readonly IWebHostEnvironment Environment;
-    public readonly string LoggingOutputFormat;
     public readonly Auth Auth;
 
     public AppSettings(IConfiguration configuration, IWebHostEnvironment environment)
@@ -16,7 +15,6 @@
             Token = configuration["SPLUNK_TOKEN"]
         };
         Auth = configuration.GetSection("auth").Get<Auth>();
-        LoggingOutputFormat = configuration["LOGGING_OUTPUT"];
     }
 }
 

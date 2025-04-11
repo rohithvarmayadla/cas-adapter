@@ -1,19 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
-using System.Linq;
-using System;
-using IdentityModel.AspNetCore.OAuth2Introspection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Net.Http;
-using Microsoft.Extensions.Configuration;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-
-public static class SecurityExtensions
+﻿public static class SecurityExtensions
 {
     public static void UseCsp(this WebApplication webApplication)
     {
