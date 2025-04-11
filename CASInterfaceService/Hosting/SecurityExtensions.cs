@@ -5,6 +5,13 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using System.Linq;
 using System;
+using IdentityModel.AspNetCore.OAuth2Introspection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Net.Http;
+using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 public static class SecurityExtensions
 {
@@ -62,6 +69,94 @@ public static class SecurityExtensions
             }
             await next.Invoke();
         });
+    }
+
+    public static IServiceCollection AddAuthentication(this IServiceCollection services, AppSettings appSettings)
+    {
+        services.AddAuthentication()
+            .AddJwtBearer("jwt", options =>
+            {
+                options.BackchannelHttpHandler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                };
+                appSettings.Configuration.GetSection("auth:jwt").Bind(options);
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = false,
+                };
+                // if token does not contain a dot, it is a reference token, forward to introspection auth scheme
+                options.ForwardDefaultSelector = ctx =>
+                {
+                    var authHeader = (string)ctx.Request.Headers["Authorization"];
+                    if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ")) return null;
+                    return authHeader.Substring("Bearer ".Length).Trim().Contains('.') ? null : "introspection";
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async ctx =>
+                    {
+                        await Task.CompletedTask;
+                        //var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Configuration>>();
+                        var claims = ctx.Principal.Claims;
+                        foreach (var claim in claims)
+                        {
+                            //logger.LogInformation($"JWT token validated. Claim: {claim.Type}: {claim.Value}");
+                        }
+                    },
+                    OnAuthenticationFailed = async ctx =>
+                    {
+                        await Task.CompletedTask;
+                        //var clientId = oidcConfig["clientId"];
+                        //var issuer = oidcConfig["issuer"];
+                        //var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Configuration>>();
+                        //logger.LogError(ctx.Exception, $"JWT authentication failed: clientId={clientId}, issuer={issuer}, jwt:authority={options.Authority}");
+                    }
+                };
+            })
+         //reference tokens handling
+         .AddOAuth2Introspection("introspection", options =>
+         {
+             options.EnableCaching = true;
+             options.CacheDuration = TimeSpan.FromMinutes(20);
+             appSettings.Configuration.GetSection("auth:introspection").Bind(options);
+             options.Events = new OAuth2IntrospectionEvents
+             {
+                 OnTokenValidated = async ctx =>
+                 {
+                     await Task.CompletedTask;
+                     var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger>();
+                     var userInfo = ctx.Principal?.FindFirst("userInfo");
+                     logger.LogDebug("{0}", userInfo);
+                 },
+                 OnAuthenticationFailed = async ctx =>
+                 {
+                     await Task.CompletedTask;
+                     //var logger = ctx.HttpContext.RequestServices.GetRequiredService<ITelemetryProvider>().Get<JwtBearerEvents>();
+                     //logger.LogError(ctx?.Result?.Failure, "Introspection authantication failed");
+                 }
+             };
+         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddAuthorization(this IServiceCollection services, AppSettings appSettings)
+    {
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
+            {
+                policy
+                .RequireAuthenticatedUser()
+                .AddAuthenticationSchemes("jwt");
+                //.RequireClaim("scope", appSettings.Auth.Jwt.Scope);
+            });
+
+            options.DefaultPolicy = options.GetPolicy(JwtBearerDefaults.AuthenticationScheme) ?? null!;
+        });
+
+        return services;
     }
 }
 
