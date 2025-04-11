@@ -48,33 +48,33 @@ services.AddAuthentication(options =>
     options.DefaultChallengeScheme = defaultScheme;
 })
 // JWT for Service Account    
-.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-{
-    options.MetadataAddress = configuration.GetValue<string>("jwt:metadataAddress");
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateAudience = true,
-        ValidateIssuer = true,
-        RequireSignedTokens = true,
-        RequireAudience = true,
-        RequireExpirationTime = true,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.FromSeconds(60),
-        //NameClaimType = ClaimTypes.Upn,
-        //RoleClaimType = ClaimTypes.Role,
-        ValidateActor = true,
-        ValidateIssuerSigningKey = true,
-    };
+//.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+//{
+//    options.MetadataAddress = configuration.GetValue<string>("jwt:metadataAddress");
+//    options.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateAudience = true,
+//        ValidateIssuer = true,
+//        RequireSignedTokens = true,
+//        RequireAudience = true,
+//        RequireExpirationTime = true,
+//        ValidateLifetime = true,
+//        ClockSkew = TimeSpan.FromSeconds(60),
+//        //NameClaimType = ClaimTypes.Upn,
+//        //RoleClaimType = ClaimTypes.Role,
+//        ValidateActor = true,
+//        ValidateIssuerSigningKey = true,
+//    };
 
-    configuration.GetSection("jwt").Bind(options);
+//    configuration.GetSection("jwt").Bind(options);
 
 
-#pragma warning disable CS8604 // Possible null reference argument.
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
+//#pragma warning disable CS8604 // Possible null reference argument.
+//#pragma warning disable CS8602 // Dereference of a possibly null reference.
 
-    options.Validate();
+//    options.Validate();
 
-})
+//})
 //JWT token handling - SSO for BCeID login
 .AddJwtBearer("jwt", options =>
 {
@@ -144,47 +144,48 @@ services.AddAuthentication(options =>
      };
 
              })
-
+             // parse JWT token
              .AddPolicyScheme(defaultScheme, defaultScheme, options =>
               {
                   options.ForwardDefaultSelector = context =>
                   {
-                      string? authorization = context.Request.Headers[HeaderNames.Authorization];
+                      //string? authorization = context.Request.Headers[HeaderNames.Authorization];
 
-                      if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
-                      {
-                          var token = authorization["Bearer ".Length..].Trim();
-                          var jwtHandler = new JwtSecurityTokenHandler();
+                      //if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
+                      //{
+                      //    var token = authorization["Bearer ".Length..].Trim();
+                      //    var jwtHandler = new JwtSecurityTokenHandler();
 
-                          if (jwtHandler.CanReadToken(token))
-                          {
-                              JwtSecurityToken jwtToken = jwtHandler.ReadJwtToken(token);
-                              var identityProviderClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "aud");
-                              if (identityProviderClaim != null && identityProviderClaim.Value.Equals(configuration.GetValue<string>("SSO:jwt:audience"), StringComparison.InvariantCultureIgnoreCase))
-                              {
-                                  return "SSO";
-                              }
-                              else
-                                  return JwtBearerDefaults.AuthenticationScheme;
-                          }
-                          return JwtBearerDefaults.AuthenticationScheme;
-                      }
-                      return JwtBearerDefaults.AuthenticationScheme;
+                      //    if (jwtHandler.CanReadToken(token))
+                      //    {
+                      //        JwtSecurityToken jwtToken = jwtHandler.ReadJwtToken(token);
+                      //        var identityProviderClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "aud");
+                      //        if (identityProviderClaim != null && identityProviderClaim.Value.Equals(configuration.GetValue<string>("SSO:jwt:audience"), StringComparison.InvariantCultureIgnoreCase))
+                      //        {
+                      //            return "SSO";
+                      //        }
+                      //        else
+                      //            return JwtBearerDefaults.AuthenticationScheme;
+                      //    }
+                      //    return JwtBearerDefaults.AuthenticationScheme;
+                      //}
+                      //return JwtBearerDefaults.AuthenticationScheme;
+                      return "jwt";
                   };
                   options.Validate();
               });
 
-services.AddAuthorization(options =>
-{
-    options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
-    {
-        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-            .RequireAuthenticatedUser()
-            .RequireClaim("user_info");
-    });
-    var ssoPolicyBuilder = new AuthorizationPolicyBuilder("SSO");
-    options.AddPolicy("OnlySSO", ssoPolicyBuilder.RequireAuthenticatedUser().Build());
-});
+//services.AddAuthorization(options =>
+//{
+//    options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
+//    {
+//        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+//            .RequireAuthenticatedUser()
+//            .RequireClaim("user_info");
+//    });
+//    var ssoPolicyBuilder = new AuthorizationPolicyBuilder("SSO");
+//    options.AddPolicy("OnlySSO", ssoPolicyBuilder.RequireAuthenticatedUser().Build());
+//});
 
 services.AddSerilog(appSettings);
 
@@ -196,6 +197,8 @@ var app = builder.Build();
 app.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
 
 // security
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseDisableHttpVerbsMiddleware(app.Configuration.GetValue("DisabledHttpVerbs", string.Empty));
 app.UseCsp();
 app.UseSecurityHeaders();
