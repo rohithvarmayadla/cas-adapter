@@ -1,21 +1,6 @@
-<<<<<<<< HEAD:api/Hosting/LoggingExtensions.cs
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
-using Serilog;
-using Serilog.Formatting.Compact;
-using System;
-using System.Net.Http;
-using System.Reflection;
-using System.Security.Claims;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Hosting;
+﻿namespace api;
 
-namespace api;
-
-public static class LoggingExtensions
-========
-﻿public static class SerilogSplunkLoggingExtensions
->>>>>>>> main:api/Hosting/SerilogSplunkLoggingExtensions.cs
+public static class SerilogSplunkLoggingExtensions
 {
     /// <summary>
     /// Configures observability instruments like logging to the web application and return an initial logger
