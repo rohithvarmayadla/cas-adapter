@@ -9,6 +9,8 @@ using System.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 
+namespace api;
+
 public static class LoggingExtensions
 {
     /// <summary>

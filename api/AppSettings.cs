@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 
+namespace api;
+
 public class AppSettings
 {
     public readonly Splunk Splunk;

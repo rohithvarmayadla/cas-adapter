@@ -9,7 +9,7 @@ WORKDIR /app
 # Create build image for runtime
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
-COPY . .
+COPY ./api .
 
 # Restore as distinct layers
 RUN dotnet restore "api.csproj"
@@ -18,7 +18,7 @@ RUN dotnet build "api.csproj" -c Release -o /app/build
 # Create publish image layer
 FROM build AS publish
 ARG BUILD_ID
-COPY . .
+COPY ./api .
 
 # Build and publish a release
 RUN dotnet publish "api.csproj" -c Release -o /app/publish

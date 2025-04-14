@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "api", "CASInterfaceService\api.csproj", "{843FCD4E-04EF-4BE6-97EA-A04DF9C8DC1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "api", "api\api.csproj", "{843FCD4E-04EF-4BE6-97EA-A04DF9C8DC1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client", "client\client.csproj", "{818C939D-A151-45B6-A0D1-43671DA8EFCF}"
 EndProject
