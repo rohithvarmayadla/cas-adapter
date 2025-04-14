@@ -1,18 +1,19 @@
 ARG BUILD_ID
 
 # Retrieve and set base image layer
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 ARG BUILD_ID
 ARG BUILD_VERSION
 WORKDIR /app
 
 # Create build image for runtime
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /app
 COPY . .
 
 # Restore as distinct layers
-RUN dotnet restore "./CASInterfaceService/CASInterfaceService/cas-interface-service.csproj"
-RUN dotnet build "CASInterfaceService/CASInterfaceService/cas-interface-service.csproj" -c Release -o /app/build
+RUN dotnet restore "api.csproj"
+RUN dotnet build "api.csproj" -c Release -o /app/build
 
 # Create publish image layer
 FROM build AS publish
@@ -20,7 +21,7 @@ ARG BUILD_ID
 COPY . .
 
 # Build and publish a release
-RUN dotnet publish "CASInterfaceService/CASInterfaceService/cas-interface-service.csproj" -c Release -o /app/publish
+RUN dotnet publish "api.csproj" -c Release -o /app/publish
 
 # Build runtime image
 FROM base AS final
@@ -28,4 +29,4 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://*:8080
-ENTRYPOINT ["dotnet", "cas-interface-service.dll"]
+ENTRYPOINT ["dotnet", "api.dll"]
