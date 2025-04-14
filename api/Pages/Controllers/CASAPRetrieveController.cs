@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -13,11 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Serilog;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-
 namespace CASInterfaceService.Pages.Controllers
 {
     [Route("api/[controller]")]
@@ -34,10 +29,10 @@ namespace CASInterfaceService.Pages.Controllers
         [HttpGet]
         public List<CASAPTransaction> GetAllTransactions()
         {
-            logger.LogInformation("In GetAllTransactions1");
-            Log.Logger.Error("In GetAllTransactions2");
+            logger.LogInformation("In GetAllTransactions");
             return CASAPTransactionRegistration.getInstance().getAllCASAPTransaction();
         }
+
         [HttpGet("GetAllTransactionRecords")]
         public JsonResult GetAllTransactionRecords()
         {
