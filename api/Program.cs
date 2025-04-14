@@ -1,10 +1,4 @@
-﻿using api;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 builder.WebHost
     .UseUrls()
     .UseKestrel();
@@ -26,20 +20,25 @@ services.AddSingleton<IConfiguration>(configuration);
 var appSettings = new AppSettings(configuration, env);
 services.AddSingleton(appSettings);
 
-builder.Host.UseSplunkSerilogPipe(appSettings);
+builder.Host.UseLogging(appSettings);
 
+// security
 services.AddCorsPolicy(builder.Configuration.GetSection("cors").Get<CorsSettings>());
+services.AddAuthentication(appSettings);
+services.AddAuthorization(appSettings);
 
-services.AddSerilog(appSettings);
+services.AddLogging(appSettings);
 
 services.AddControllers();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
 var app = builder.Build();
-app.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
 
 // security
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers().RequireAuthorization();
 app.UseDisableHttpVerbsMiddleware(app.Configuration.GetValue("DisabledHttpVerbs", string.Empty));
 app.UseCsp();
 app.UseSecurityHeaders();
