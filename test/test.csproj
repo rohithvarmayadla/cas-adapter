@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CASInterfaceService\api.csproj" />
+    <ProjectReference Include="..\api\api.csproj" />
     <ProjectReference Include="..\client\client.csproj" />
   </ItemGroup>
 

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -10,18 +8,17 @@ using CASInterfaceService.Pages.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-
 namespace CASInterfaceService.Pages.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
-    public class CASAPRetreiveController : Controller
+    public class CASAPRetreiveController(ILogger<CASAPRetreiveController> logger) : Controller
     {
         private string URL = "";
         private string TokenURL = "";
@@ -32,8 +29,10 @@ namespace CASInterfaceService.Pages.Controllers
         [HttpGet]
         public List<CASAPTransaction> GetAllTransactions()
         {
+            logger.LogInformation("In GetAllTransactions");
             return CASAPTransactionRegistration.getInstance().getAllCASAPTransaction();
         }
+
         [HttpGet("GetAllTransactionRecords")]
         public JsonResult GetAllTransactionRecords()
         {
