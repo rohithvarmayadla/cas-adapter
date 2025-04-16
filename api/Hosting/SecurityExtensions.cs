@@ -1,4 +1,6 @@
-﻿public static class SecurityExtensions
+﻿namespace Api;
+
+public static class SecurityExtensions
 {
     public static void UseCsp(this WebApplication webApplication)
     {

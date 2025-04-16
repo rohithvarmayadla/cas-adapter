@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "CASInterfaceService": {
+    "CAS Adapter": {
       "commandName": "Project",
       "launchBrowser": false,
       "environmentVariables": {

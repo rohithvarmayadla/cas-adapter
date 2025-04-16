@@ -1,10 +1,10 @@
-CAS API Gateway
+CAS Adapter
 =
 [![ci-cas-adapter](https://github.com/bcgov/cas-interface-service/actions/workflows/ci-cas-adapter.yml/badge.svg)](https://github.com/bcgov/cas-interface-services/actions/workflows/ci-cas-adapter.yml)
 [![cd-cas-adapter](https://github.com/bcgov/cas-interface-service/actions/workflows/cd-cas-adapter.yml/badge.svg)](https://github.com/bcgov/cas-interface-services/actions/workflows/cd-cas-adapter.yml)
 [![codecov](https://codecov.io/gh/bcgov/cas-interface-service/branch/main/graph/badge.svg?token=d5woacAxGD)](https://codecov.io/gh/bcgov/cas-interface-services)
 
-A collection of CAS APIs
+An adapter to access a collection of CAS APIs
 
 Technology Stack
 -
