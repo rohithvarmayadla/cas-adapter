@@ -33,7 +33,7 @@ jobs:
             ${{ env.APP_NAME }}:latest
 
       - name: Login to Registry
-        run:  echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin ${{ env.REGISTRY }}/${{ env.APP_NAME }}
+        run:  echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin ${{ env.REGISTRY }}
 
       - name: Tag Image
         run:  docker tag ${{ env.APP_NAME }}:latest ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
