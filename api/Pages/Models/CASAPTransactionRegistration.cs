@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Twitter;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;

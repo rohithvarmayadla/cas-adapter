@@ -1,0 +1,43 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: cas-api-gateway
+
+parameters:
+- name: APP_NAME
+  description: The name of the application
+  required: true
+  value: cas-api-gateway
+- name: BUILD_IMAGE_NAME
+  description: Base Docker Image Name
+  required: true
+  value: cas-api-gateway
+- name: BUILD_IMAGE_TAG
+  description: Base Docker Image Tag
+  required: true
+  value: latest
+- name: DEST_IMAGE_TAG
+
+objects:
+# Destination ImageStream
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    name: ${APP_NAME}
+  spec:
+    lookupPolicy:
+      local: true
+
+# Build Source ImageStream
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    name: ${BUILD_IMAGE_NAME}
+  spec:
+    lookupPolicy:
+      local: true
+    tags:
+    - name: ${BUILD_IMAGE_TAG}
+      from:
+        kind: DockerImage
+        name: docker.io/${BUILD_IMAGE_NAME}:${BUILD_IMAGE_TAG}

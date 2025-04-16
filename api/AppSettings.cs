@@ -1,4 +1,6 @@
-﻿public class AppSettings
+﻿namespace api;
+
+public class AppSettings
 {
     public readonly Splunk Splunk;
     public readonly IConfiguration Configuration;

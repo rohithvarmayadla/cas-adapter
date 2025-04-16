@@ -1,4 +1,6 @@
-﻿public static class SerilogSplunkLoggingExtensions
+﻿namespace api;
+
+public static class SerilogSplunkLoggingExtensions
 {
     /// <summary>
     /// Configures observability instruments like logging to the web application and return an initial logger

@@ -1,7 +1,6 @@
-# CASInterfaceService
-This is a work in progress at this time.
+# CAS API Gateway
 
-This will be an interface between the BC Government and CAS. It will take a json package and communicate the information with CAS. 
+A collection of CAS APIs
 
 # DOCKER
 `docker build . -t cas-api`
