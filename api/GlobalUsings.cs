@@ -7,6 +7,7 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Options;
 global using Microsoft.Extensions.Primitives;
+global using Model.Settings;
 global using System.Linq;
 global using System;
 global using Utilities;

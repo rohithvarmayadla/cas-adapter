@@ -4,13 +4,18 @@
 [ApiController]
 public class InvoiceController : Controller
 {
-    private readonly IConfiguration _configuration;
     private readonly ICasHttpClient _casHttpClient;
 
-    public InvoiceController(IConfiguration configuration, ICasHttpClient casHttpClient)
+    public InvoiceController(AppSettings appSettings, ICasHttpClient casHttpClient)
     {
-        _configuration = configuration;
         _casHttpClient = casHttpClient;
+
+        if (string.IsNullOrEmpty(appSettings.Client?.Id) || string.IsNullOrEmpty(appSettings.Client.Secret) || string.IsNullOrEmpty(appSettings.Client.BaseUrl) || string.IsNullOrEmpty(appSettings.Client.TokenUrl))
+        {
+            throw new ArgumentNullException("Client is not configured. Check your user secrets, appsettings, and environment variables.");
+        }
+
+        _casHttpClient.Initialize(appSettings.Client);
     }
 
     [HttpPost]
@@ -20,10 +25,9 @@ public class InvoiceController : Controller
         {
             return BadRequest("Invoice data is required.");
         }
-        var clientId = _configuration["ClientId"];
-        var clientKey = _configuration["ClientKey"];
-        _casHttpClient.Initialize(clientId, clientKey, "https://wsgw.test.jag.gov.bc.ca/victim/api/cas");
-        await _casHttpClient.ApTransaction(invoice);
-        return Ok("Invoice sent successfully.");
+
+        (var result, var statusCode) = await _casHttpClient.ApTransaction(invoice);
+
+        return StatusCode((int)statusCode, new JsonResult(result));
     }
 }

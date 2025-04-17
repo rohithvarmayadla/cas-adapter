@@ -2,6 +2,7 @@
 using Utilities;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using Model.Settings;
 
 // NOTE Coast has DEV, TEST, and PROD environments while CAS may only have TEST, and PROD (to be confirmed)
 // The KeyValues from the database will authenticate https://wsgw.test.jag.gov.bc.ca but not DEV
@@ -14,23 +15,18 @@ public class CasHttpClient : ICasHttpClient
     // in one pool of HttpClient(s)
     // There is also the topic of disposing HttpClient, touched here https://stackoverflow.com/questions/15705092/do-httpclient-and-httpclienthandler-have-to-be-disposed-between-requests
     private HttpClient _httpClient = null;
+    private Client _settings = null;
 
-    // TODO remove these
-    private string clientId2;
-    private string secret;
-
-    public void Initialize(string clientId, string clientKey, string url)
+    // TODO this will be removed when "Access Token Management" ticket is completed
+    public void Initialize(Client settings)
     {
-        // TODO remove these
-        clientId2 = clientId;
-        secret = clientKey;
+        _settings = settings;
+
         var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Add("clientID", clientId);
-        httpClient.DefaultRequestHeaders.Add("secret", clientKey);
+        //httpClient.DefaultRequestHeaders.Add("clientID", settings.Id);
+        //httpClient.DefaultRequestHeaders.Add("secret", settings.Secret);
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        //https://wsgw.test.jag.gov.bc.ca/victim/api/cas
-        //httpClient.BaseAddress = new Uri(url);
-        httpClient.BaseAddress = new Uri("https://wsgw.test.jag.gov.bc.ca");
+        httpClient.BaseAddress = new Uri(settings.BaseUrl);
         httpClient.Timeout = new TimeSpan(1, 0, 0);  // 1 hour timeout 
         _httpClient = httpClient;
     }
@@ -54,7 +50,7 @@ public class CasHttpClient : ICasHttpClient
 
             HttpClient client = new HttpClient(handler);
 
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", clientId2, secret))));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", _settings.Id, _settings.Secret))));
 
             var request = new HttpRequestMessage(HttpMethod.Post, TokenURL);
 
@@ -94,8 +90,9 @@ public class CasHttpClient : ICasHttpClient
         return null;
     }
 
-    public async Task<bool> ApTransaction(CasApTransaction invoices)
+    public async Task<Tuple<string, HttpStatusCode>> ApTransaction(CasApTransaction invoices)
     {
+        var httpStatusCode = HttpStatusCode.InternalServerError;
         string outputMessage = "";
 
         try
@@ -116,13 +113,10 @@ public class CasHttpClient : ICasHttpClient
 
                 Console.WriteLine(DateTime.Now + " This was the result: " + packageResult.StatusCode);
                 //outputMessage = Convert.ToString(packageResult.StatusCode);
-                outputMessage = Convert.ToString(packageResult.Content.ReadAsStringAsync().Result);
+                outputMessage = await packageResult.Content.ReadAsStringAsync();
                 Console.WriteLine(DateTime.Now + " Output Message: " + outputMessage);
 
-                if (packageResult.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    Console.WriteLine(DateTime.Now + " Ruh Roh, there was an error: " + packageResult.StatusCode);
-                }
+                httpStatusCode = packageResult.StatusCode;
             }
         }
         catch (Exception e)
@@ -135,9 +129,8 @@ public class CasHttpClient : ICasHttpClient
             //return errorObject;
         }
 
-        var xjo = JObject.Parse(outputMessage);
         //Console.WriteLine(DateTime.Now + " Successfully sent invoice: " + invoices.invoiceNumber);
-        return true;
+        return new (outputMessage, httpStatusCode);
     }
 }
 

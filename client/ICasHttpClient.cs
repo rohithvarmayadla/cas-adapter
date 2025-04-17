@@ -2,7 +2,7 @@
 
 public interface ICasHttpClient
 {
-    void Initialize(string clientId, string clientKey, string url);
+    void Initialize(Client settings);
     Task<string> GetToken();
-    Task<bool> ApTransaction(CasApTransaction invoices);
+    Task<Tuple<string, HttpStatusCode>> ApTransaction(CasApTransaction invoices);
 }
