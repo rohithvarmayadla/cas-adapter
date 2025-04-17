@@ -20,6 +20,8 @@ services.AddSingleton<IConfiguration>(configuration);
 var appSettings = new AppSettings(configuration, env);
 services.AddSingleton(appSettings);
 
+services.AddTransient<ICasHttpClient, CasHttpClient>();
+
 builder.Host.UseLogging(appSettings);
 
 // security

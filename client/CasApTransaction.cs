@@ -62,7 +62,7 @@
 
     public string CurrencyCode { get; set; }
 
-    public string AccountNumber { get; set; }
+    public string? AccountNumber { get; set; }
 
     private string _transitNumber = string.Empty;
     public string TransitNumber
@@ -120,9 +120,9 @@
         }
     }
 
-    public string EFTAdvice { get; set; }
+    public string? EFTAdvice { get; set; }
 
-    public string EmailAddress { get; set; }
+    public string? EmailAddress { get; set; }
 
     public List<CasApTransactionInvoiceLineDetail> InvoiceLineDetails { get; set; }
 

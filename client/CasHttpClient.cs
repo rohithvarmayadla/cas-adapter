@@ -1,7 +1,4 @@
-﻿using System.Text;
-using System.Xml.Linq;
-using System.Xml;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using Utilities;
 using Newtonsoft.Json.Linq;
 using System.Net;
@@ -101,7 +98,7 @@ public class CasHttpClient : ICasHttpClient
     {
         string outputMessage = "";
 
-        try 
+        try
         {
             var URL = "https://wsgw.test.jag.gov.bc.ca/victim/ords/castrain/cfs/apinvoice/";
             var responseToken = await GetToken();
@@ -142,6 +139,7 @@ public class CasHttpClient : ICasHttpClient
         //Console.WriteLine(DateTime.Now + " Successfully sent invoice: " + invoices.invoiceNumber);
         return true;
     }
+}
 
 
 //public static class CasHttpClientExtensions
