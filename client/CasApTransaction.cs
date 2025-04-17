@@ -1,4 +1,4 @@
-﻿public class CasApTransactionInvoices
+﻿public class CasApTransaction
 {
     public bool IsBlockSupplier { get; set; }
 

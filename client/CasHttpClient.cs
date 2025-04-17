@@ -4,6 +4,7 @@ using System.Xml;
 using System.Net.Http.Headers;
 using Utilities;
 using Newtonsoft.Json.Linq;
+using System.Net;
 
 // NOTE Coast has DEV, TEST, and PROD environments while CAS may only have TEST, and PROD (to be confirmed)
 // The KeyValues from the database will authenticate https://wsgw.test.jag.gov.bc.ca but not DEV
@@ -79,26 +80,6 @@ public class CasHttpClient : ICasHttpClient
             Console.WriteLine(DateTime.Now + " Received token successfully, now to send package to CAS.");
             return responseToken;
 
-            // Token received, now send package using token
-            //using (var packageClient = new HttpClient())
-            //{
-            //    packageClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", responseToken);
-            //    var jsonString = JsonConvert.SerializeObject(casAPTransaction);
-            //    //HttpContent postContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-            //    HttpContent postContent = new StringContent(jsonString);
-            //    Console.WriteLine(DateTime.Now + " JSON: " + jsonString);
-            //    HttpResponseMessage packageResult = await packageClient.PostAsync(URL, postContent);
-
-            //    Console.WriteLine(DateTime.Now + " This was the result: " + packageResult.StatusCode);
-            //    //outputMessage = Convert.ToString(packageResult.StatusCode);
-            //    outputMessage = Convert.ToString(packageResult.Content.ReadAsStringAsync().Result);
-            //    Console.WriteLine(DateTime.Now + " Output Message: " + outputMessage);
-
-            //    if (packageResult.StatusCode == HttpStatusCode.Unauthorized)
-            //    {
-            //        Console.WriteLine(DateTime.Now + " Ruh Roh, there was an error: " + packageResult.StatusCode);
-            //    }
-            //}
         }
         catch (Exception e)
         {
@@ -116,47 +97,52 @@ public class CasHttpClient : ICasHttpClient
         return null;
     }
 
-    public async Task<bool> ApTransaction(CasApTransactionInvoices invoices)
+    public async Task<bool> ApTransaction(CasApTransaction invoices)
     {
-        if (_httpClient == null)
-            throw new Exception("HttpClient not initialized. Call Initialize() first.");
+        string outputMessage = "";
 
-        // TODO check defaultDistributionAccount is not null or empty
-
-        //var jsonRequest = JsonConvert.SerializeObject(invoices);
-        var jsonRequest = invoices.ToJSONString();
-        //var jsonRequest = "{\r\n \"invoiceType\": \"Standard\",\r\n \"supplierNumber\": \"2002740\",\r\n \"supplierSiteNumber\": \"001\",\r\n \"invoiceDate\": \"12-Dec-2024\",\r\n \"invoiceNumber\": \"INV-2021-002446\",\r\n \"invoiceAmount\": 1000.00,\r\n \"payGroup\": \"GEN CHQ\",\r\n \"dateInvoiceReceived\": \"12-Dec-2024\",\r\n \"dateGoodsReceived\": \"\",\r\n \"remittanceCode\": \"01\",\r\n \"specialHandling\": \"N\",\r\n \"nameLine1\": \"Ida Test Albert Test\",\r\n \"nameLine2\": \"\",\r\n \"addressLine1\": \"123 Park Road\",\r\n \"addressLine2\": \"\",\r\n \"addressLine3\": \"\",\r\n \"city\": \"Vancouver\",\r\n \"country\": \"Canada\",\r\n \"province\": \"BC\",\r\n \"postalCode\": \"T2J2Z2\",\r\n \"qualifiedReceiver\": \"team\",\r\n \"terms\": \"Immediate\",\r\n \"payAloneFlag\": \"Y\",\r\n \"paymentAdviceComments\": \"Test1\",\r\n \"remittanceMessage1\": \"Test2\",\r\n \"remittanceMessage2\": \"Test3\",\r\n \"remittanceMessage3\": \"\",\r\n \"glDate\": \"12-Dec-2024\",\r\n \"invoiceBatchName\": \"SNBATCH\",\r\n \"currencyCode\": \"CAD\",\r\n \"invoiceLineDetails\": [{\r\n   \"invoiceLineNumber\": 1,\r\n   \"invoiceLineType\": \"Item\",\r\n   \"lineCode\": \"DR\",\r\n   \"invoiceLineAmount\": 1000.00,\r\n   \"defaultDistributionAccount\": \"010.15106.12120.6038.1501300.000000.0000\",\r\n   \"description\": \"\",\r\n   \"taxClassificationCode\": \"\",\r\n   \"distributionSupplier\": \"\",\r\n   \"info1\": \"\",\r\n   \"info2\": \"\",\r\n   \"info3\": \"\"\r\n   }]\r\n}";
-        //var jsonRequest = "{\r\n \"invoiceType\": \"Standard\",\r\n \"supplierNumber\": \"2002740\",\r\n \"supplierSiteNumber\": \"001\",\r\n \"invoiceDate\": \"30-Jun-2021\",\r\n \"invoiceNumber\": \"INV-2021-002446\",\r\n \"invoiceAmount\": 1000.00,\r\n \"payGroup\": \"GEN CHQ\",\r\n \"dateInvoiceReceived\": \"30-Jun-2021\",\r\n \"dateGoodsReceived\": \"\",\r\n \"remittanceCode\": \"01\",\r\n \"specialHandling\": \"N\",\r\n \"nameLine1\": \"Ida Test Albert Test\",\r\n \"nameLine2\": \"\",\r\n \"addressLine1\": \"\",\r\n \"addressLine2\": \"\",\r\n \"addressLine3\": \"\",\r\n \"city\": \"Calgary\",\r\n \"country\": \"CA\",\r\n \"province\": \"AB\",\r\n \"postalCode\": \"T2J2Z2\",\r\n \"qualifiedReceiver\": \"team\",\r\n \"terms\": \"Immediate\",\r\n \"payAloneFlag\": \"Y\",\r\n \"paymentAdviceComments\": \"\",\r\n \"remittanceMessage1\": \"\",\r\n \"remittanceMessage2\": \"\",\r\n \"remittanceMessage3\": \"\",\r\n \"glDate\": \"12-Dec-2024\",\r\n \"invoiceBatchName\": \"SNBATCH\",\r\n \"currencyCode\": \"CAD\",\r\n \"invoiceLineDetails\": [{\r\n   \"invoiceLineNumber\": 1,\r\n   \"invoiceLineType\": \"Item\",\r\n   \"lineCode\": \"DR\",\r\n   \"invoiceLineAmount\": 1000.00,\r\n   \"defaultDistributionAccount\": \"010.15106.12120.6038.1501300.000000.0000\",\r\n   \"description\": \"\",\r\n   \"taxClassificationCode\": \"\",\r\n   \"distributionSupplier\": \"\",\r\n   \"info1\": \"\",\r\n   \"info2\": \"\",\r\n   \"info3\": \"\"\r\n   }]\r\n}";
-        //var jsonRequest = "";
-        var url = $"{_httpClient.BaseAddress}victim/api/cas/api/CASAPTransaction";
-        var httpContent = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync(url, httpContent);
-        if (!response.IsSuccessStatusCode)
+        try 
         {
-            throw new Exception($"Request {url} returned {response.StatusCode} status code.");
-        }
-        var httpResponse = await response.Content.ReadAsStringAsync();
+            var URL = "https://wsgw.test.jag.gov.bc.ca/victim/ords/castrain/cfs/apinvoice/";
+            var responseToken = await GetToken();
 
-        var jsonReader = System.Runtime.Serialization.Json.JsonReaderWriterFactory.CreateJsonReader(Encoding.UTF8.GetBytes(httpResponse), new XmlDictionaryReaderQuotas());
-
-        var root = XElement.Load(jsonReader);
-        if (root.Element("CAS-Returned-Messages") != null)
-        {
-            var casReturnedMessages = root.Element("CAS-Returned-Messages");
-            if (casReturnedMessages != null)
+            using (var packageClient = new HttpClient())
             {
-                if (!(casReturnedMessages.Value.Equals("SUCCEEDED", StringComparison.InvariantCultureIgnoreCase) | casReturnedMessages.Value.Contains("Duplicate Submission")))
-                    throw new Exception(casReturnedMessages.Value + "\r\n" + jsonRequest);
-            }
-            else
-                throw new Exception(httpResponse + "\r\n" + jsonRequest);
-        }
-        else
-            throw new Exception(httpResponse + "\r\n" + jsonRequest);
+                packageClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", responseToken);
+                //var jsonString = JsonConvert.SerializeObject(invoices);
+                var jsonString = invoices.ToJSONString();
 
+                //HttpContent postContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+                HttpContent postContent = new StringContent(jsonString);
+                Console.WriteLine(DateTime.Now + " JSON: " + jsonString);
+                HttpResponseMessage packageResult = await packageClient.PostAsync(URL, postContent);
+
+                Console.WriteLine(DateTime.Now + " This was the result: " + packageResult.StatusCode);
+                //outputMessage = Convert.ToString(packageResult.StatusCode);
+                outputMessage = Convert.ToString(packageResult.Content.ReadAsStringAsync().Result);
+                Console.WriteLine(DateTime.Now + " Output Message: " + outputMessage);
+
+                if (packageResult.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine(DateTime.Now + " Ruh Roh, there was an error: " + packageResult.StatusCode);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            //var errorContent = new StringContent(casAPTransaction.ToString(), Encoding.UTF8, "application/json");
+            //Console.WriteLine(DateTime.Now + " Error in RegisterCASAPTransaction. Invoice: " + casAPTransaction.invoiceNumber);
+            //dynamic errorObject = new JObject();
+            //errorObject.invoice_number = null;
+            //errorObject.CAS_Returned_Messages = "Generic Error: " + e.Message;
+            //return errorObject;
+        }
+
+        var xjo = JObject.Parse(outputMessage);
+        //Console.WriteLine(DateTime.Now + " Successfully sent invoice: " + invoices.invoiceNumber);
         return true;
     }
-}
+
 
 //public static class CasHttpClientExtensions
 //{
