@@ -1,4 +1,5 @@
 ﻿global using Api;
+global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.Extensions.Configuration;
@@ -6,8 +7,10 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Options;
 global using Microsoft.Extensions.Primitives;
+global using Model.Settings;
 global using System.Linq;
 global using System;
+global using Client;
 global using IdentityModel.AspNetCore.OAuth2Introspection;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.IdentityModel.Tokens;

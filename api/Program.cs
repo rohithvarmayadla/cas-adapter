@@ -7,18 +7,8 @@ builder.WebHost
 var services = builder.Services;
 var env = builder.Environment;
 
-// configuration binded using user secrets
-var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-    .AddUserSecrets<Program>()
-    .AddEnvironmentVariables()
-    .Build();
-services.AddSingleton<IConfiguration>(configuration);
-
-// app settings 
-var appSettings = new AppSettings(configuration, env);
-services.AddSingleton(appSettings);
+var appSettings = services.AddAppSettings(env);
+services.AddTransient<ICasHttpClient, CasHttpClient>();
 
 builder.Host.UseLogging(appSettings);
 
