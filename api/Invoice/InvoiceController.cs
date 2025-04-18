@@ -28,6 +28,6 @@ public class InvoiceController : Controller
 
         (var result, var statusCode) = await _casHttpClient.ApTransaction(invoice);
 
-        return StatusCode((int)statusCode, new JsonResult(result));
+        return StatusCode((int)statusCode, new JsonResult(result).Value);
     }
 }
