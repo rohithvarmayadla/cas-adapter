@@ -1,13 +1,11 @@
-﻿using System.Net.Http.Headers;
-using Utilities;
-using Newtonsoft.Json.Linq;
-using System.Net;
-using Model.Settings;
+﻿using Newtonsoft.Json;
+
+namespace Client;
 
 // NOTE Coast has DEV, TEST, and PROD environments while CAS may only have TEST, and PROD (to be confirmed)
 // The KeyValues from the database will authenticate https://wsgw.test.jag.gov.bc.ca but not DEV
 // To get error messages returned from the service, check the pod logs for cas-interface-service
-public class CasHttpClient : ICasHttpClient
+public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
 {
     // TODO I remember there are some caveats to HttpClient scope and disposing, which is why the Extension DI register might be better if more HttpClients are added
     // Consider researching and implementing the commented out Extension method below, if time permits. I would assume the Extension would affectively get a HttpClient
@@ -15,125 +13,76 @@ public class CasHttpClient : ICasHttpClient
     // in one pool of HttpClient(s)
     // There is also the topic of disposing HttpClient, touched here https://stackoverflow.com/questions/15705092/do-httpclient-and-httpclienthandler-have-to-be-disposed-between-requests
     private HttpClient _httpClient = null;
-    private Client _settings = null;
+    private Model.Settings.Client _settings = null;
 
     // TODO this will be removed when "Access Token Management" ticket is completed
-    public void Initialize(Client settings)
+    public void Initialize(Model.Settings.Client settings)
     {
         _settings = settings;
 
         var httpClient = new HttpClient();
-        //httpClient.DefaultRequestHeaders.Add("clientID", settings.Id);
-        //httpClient.DefaultRequestHeaders.Add("secret", settings.Secret);
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         httpClient.BaseAddress = new Uri(settings.BaseUrl);
         httpClient.Timeout = new TimeSpan(1, 0, 0);  // 1 hour timeout 
         _httpClient = httpClient;
     }
 
+    // get authentication bearer token for subsequent requests
     public async Task<string> GetToken()
     {
-        //var URL = _httpClient.BaseAddress + "cfs/apinvoice/"; // CAS AP URL
-        //var TokenURL = _httpClient.BaseAddress + "oauth/token"; // CAS AP Token URL
-        var TokenURL = "https://wsgw.test.jag.gov.bc.ca/victim/ords/castrain/oauth/token"; // CAS AP Token URL
-
-        // Now we must call CAS with this data
-        string outputMessage;
-
         try
         {
-            // Start by getting token
-            Console.WriteLine(DateTime.Now + " Starting sendTransactionsToCAS (CASAPTransactionController).");
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", _settings.Id, _settings.Secret))));
 
-            HttpClientHandler handler = new HttpClientHandler();
-            Console.WriteLine(DateTime.Now + " GET: + " + TokenURL);
-
-            HttpClient client = new HttpClient(handler);
-
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", _settings.Id, _settings.Secret))));
-
-            var request = new HttpRequestMessage(HttpMethod.Post, TokenURL);
-
+            var request = new HttpRequestMessage(HttpMethod.Post, _settings.TokenUrl);
             var formData = new List<KeyValuePair<string, string>>();
             formData.Add(new KeyValuePair<string, string>("grant_type", "client_credentials"));
-
-            Console.WriteLine(DateTime.Now + " Add credentials");
             request.Content = new FormUrlEncodedContent(formData);
-            var response = await client.SendAsync(request);
 
+            var response = await _httpClient.SendAsync(request);
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            Console.WriteLine(DateTime.Now + " Response Received: " + response.StatusCode);
             response.EnsureSuccessStatusCode();
 
-            // Put token alone in responseToken
             string responseBody = await response.Content.ReadAsStringAsync();
             var jo = JObject.Parse(responseBody);
-            string responseToken = jo["access_token"].ToString();
-
-            Console.WriteLine(DateTime.Now + " Received token successfully, now to send package to CAS.");
-            return responseToken;
-
+            return jo["access_token"].ToString();
         }
         catch (Exception e)
         {
-            //var errorContent = new StringContent(casAPTransaction.ToString(), Encoding.UTF8, "application/json");
-            //Console.WriteLine(DateTime.Now + " Error in RegisterCASAPTransaction. Invoice: " + casAPTransaction.invoiceNumber);
-            //dynamic errorObject = new JObject();
-            //errorObject.invoice_number = null;
-            //errorObject.CAS_Returned_Messages = "Generic Error: " + e.Message;
-            //return errorObject;
+            logger.LogError(e, "Error getting token");
+            throw;
         }
-
-        //var xjo = JObject.Parse(outputMessage);
-        //Console.WriteLine(DateTime.Now + " Successfully sent invoice: " + casAPTransaction.invoiceNumber);
-        //return xjo;
-        return null;
     }
 
     public async Task<Tuple<string, HttpStatusCode>> ApTransaction(CasApTransaction invoices)
     {
-        var httpStatusCode = HttpStatusCode.InternalServerError;
-        string outputMessage = "";
-
         try
         {
-            var URL = "https://wsgw.test.jag.gov.bc.ca/victim/ords/castrain/cfs/apinvoice/";
+            var URL = _settings.BaseUrl + "/cfs/apinvoice/";
             var responseToken = await GetToken();
 
             using (var packageClient = new HttpClient())
             {
                 packageClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", responseToken);
-                //var jsonString = JsonConvert.SerializeObject(invoices);
                 var jsonString = invoices.ToJSONString();
-
-                //HttpContent postContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-                HttpContent postContent = new StringContent(jsonString);
-                Console.WriteLine(DateTime.Now + " JSON: " + jsonString);
-                HttpResponseMessage packageResult = await packageClient.PostAsync(URL, postContent);
-
-                Console.WriteLine(DateTime.Now + " This was the result: " + packageResult.StatusCode);
-                //outputMessage = Convert.ToString(packageResult.StatusCode);
-                outputMessage = await packageResult.Content.ReadAsStringAsync();
-                Console.WriteLine(DateTime.Now + " Output Message: " + outputMessage);
-
-                httpStatusCode = packageResult.StatusCode;
+                var postContent = new StringContent(jsonString);
+                var packageResult = await packageClient.PostAsync(URL, postContent);
+                var outputMessage = await packageResult.Content.ReadAsStringAsync();
+                var httpStatusCode = packageResult.StatusCode;
+                return new(outputMessage, httpStatusCode);
             }
         }
         catch (Exception e)
         {
-            //var errorContent = new StringContent(casAPTransaction.ToString(), Encoding.UTF8, "application/json");
-            //Console.WriteLine(DateTime.Now + " Error in RegisterCASAPTransaction. Invoice: " + casAPTransaction.invoiceNumber);
-            //dynamic errorObject = new JObject();
-            //errorObject.invoice_number = null;
-            //errorObject.CAS_Returned_Messages = "Generic Error: " + e.Message;
-            //return errorObject;
+            logger.LogError(e, $"Error generating invoice: {invoices.InvoiceNumber}");
+            dynamic errorObject = new JObject();
+            errorObject.invoice_number = invoices.InvoiceNumber;
+            errorObject.CAS_Returned_Messages = "Internal Error: " + e.Message;
+            return new (JsonConvert.SerializeObject(errorObject), HttpStatusCode.InternalServerError);
         }
 
-        //Console.WriteLine(DateTime.Now + " Successfully sent invoice: " + invoices.invoiceNumber);
-        return new (outputMessage, httpStatusCode);
     }
 }
-
 
 //public static class CasHttpClientExtensions
 //{

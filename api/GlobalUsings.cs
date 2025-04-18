@@ -10,7 +10,7 @@ global using Microsoft.Extensions.Primitives;
 global using Model.Settings;
 global using System.Linq;
 global using System;
-global using Utilities;
+global using Client;
 global using IdentityModel.AspNetCore.OAuth2Introspection;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.IdentityModel.Tokens;

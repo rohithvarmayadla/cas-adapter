@@ -6,7 +6,7 @@ public class AppSettings
     public readonly IConfiguration Configuration;
     public readonly IWebHostEnvironment Environment;
     public readonly Auth Auth;
-    public readonly Client Client;
+    public readonly Model.Settings.Client Client;
 
     public AppSettings(IConfiguration configuration, IWebHostEnvironment environment)
     {
@@ -18,7 +18,7 @@ public class AppSettings
             Token = configuration["SPLUNK_TOKEN"]
         };
         Auth = configuration.GetSection("auth").Get<Auth>();
-        Client = new Client
+        Client = new Model.Settings.Client
         {
             Id = configuration["ClientId"],
             Secret = configuration["ClientKey"],

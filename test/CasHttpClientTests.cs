@@ -1,11 +1,9 @@
-﻿public class CasHttpClientTests(ICasHttpClient casHttpClient, IConfiguration configuration)
+﻿public class CasHttpClientTests(ICasHttpClient casHttpClient, AppSettings appSettings)
 {
     [Fact]
     public async Task Get_Token_Success()
     {
-        var clientId = configuration["ClientId"];
-        var clientKey = configuration["ClientKey"];
-        casHttpClient.Initialize(clientId, clientKey, "https://wsgw.test.jag.gov.bc.ca/victim/api/castrain");
+        casHttpClient.Initialize(appSettings.Client);
 
         var token = await casHttpClient.GetToken();
 
