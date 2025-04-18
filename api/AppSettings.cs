@@ -27,3 +27,23 @@ public class AppSettings
         };
     }
 }
+
+public static class AppSettingsExtensions
+{
+    public static AppSettings AddAppSettings(this IServiceCollection services, IWebHostEnvironment environment)
+    {
+        // configuration binded using user secrets
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true)
+            .AddUserSecrets<Program>()
+            .AddEnvironmentVariables()
+            .Build();
+        services.AddSingleton<IConfiguration>(configuration);
+
+        // app settings 
+        var appSettings = new AppSettings(configuration, environment);
+        services.AddSingleton(appSettings);
+        return appSettings;
+    }
+}

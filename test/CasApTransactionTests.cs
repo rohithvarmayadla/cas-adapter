@@ -1,4 +1,4 @@
-﻿public class CasApTransactionTests(ICasHttpClient casHttpClient, IConfiguration configuration)
+﻿public class CasApTransactionTests(ICasHttpClient casHttpClient, AppSettings appSettings)
 {
     // TODO this is correctly configured to use coast utilities and should use this solution cas-interface-service.api instead
     [Fact]
@@ -48,10 +48,8 @@
                 DefaultDistributionAccount = "010.15004.10250.5298.1500000.000000.0000",
             }
         };
-        //https://wsgw.test.jag.gov.bc.ca/victim/api/cas
-        var clientId = configuration["ClientId"];
-        var clientKey = configuration["ClientKey"];
-        casHttpClient.Initialize(clientId, clientKey, "https://wsgw.test.jag.gov.bc.ca/victim/api/cas");
+
+        casHttpClient.Initialize(appSettings.Client);
         await casHttpClient.ApTransaction(invoices);
 
         // returns 
