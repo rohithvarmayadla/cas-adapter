@@ -3,6 +3,7 @@
 public interface ICasHttpClient
 {
     void Initialize(Model.Settings.Client settings);
-    Task<string> GetToken();
-    Task<Tuple<string, HttpStatusCode>> ApTransaction(CasApTransaction invoices);
+    Task GetToken();
+    Task<Tuple<string, HttpStatusCode>> GenerateInvoice(CasApTransaction invoices);
+    Task<Tuple<string, HttpStatusCode>> SearchInvoice(string invoiceNumber, string supplierNumber, string supplierSiteCode);
 }

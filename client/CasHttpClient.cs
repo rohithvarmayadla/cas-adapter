@@ -1,17 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿namespace Client;
 
-namespace Client;
-
-// NOTE Coast has DEV, TEST, and PROD environments while CAS may only have TEST, and PROD (to be confirmed)
-// The KeyValues from the database will authenticate https://wsgw.test.jag.gov.bc.ca but not DEV
-// To get error messages returned from the service, check the pod logs for cas-interface-service
 public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
 {
-    // TODO I remember there are some caveats to HttpClient scope and disposing, which is why the Extension DI register might be better if more HttpClients are added
-    // Consider researching and implementing the commented out Extension method below, if time permits. I would assume the Extension would affectively get a HttpClient
-    // from a pool of available HttpClient(s), and dispose of them properly. The downside at first glance seems to be you have multiple client api urls all cluttered 
-    // in one pool of HttpClient(s)
-    // There is also the topic of disposing HttpClient, touched here https://stackoverflow.com/questions/15705092/do-httpclient-and-httpclienthandler-have-to-be-disposed-between-requests
     private HttpClient _httpClient = null;
     private Model.Settings.Client _settings = null;
 
@@ -28,7 +18,7 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
     }
 
     // get authentication bearer token for subsequent requests
-    public async Task<string> GetToken()
+    public async Task GetToken()
     {
         try
         {
@@ -45,7 +35,8 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
 
             string responseBody = await response.Content.ReadAsStringAsync();
             var jo = JObject.Parse(responseBody);
-            return jo["access_token"].ToString();
+            var bearerToken = jo["access_token"].ToString();
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
         }
         catch (Exception e)
         {
@@ -54,33 +45,49 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
         }
     }
 
-    public async Task<Tuple<string, HttpStatusCode>> ApTransaction(CasApTransaction invoices)
+    public async Task<Tuple<string, HttpStatusCode>> GenerateInvoice(CasApTransaction invoice)
     {
+        invoice.ThrowIfNull();
+
         try
         {
-            var URL = _settings.BaseUrl + "/cfs/apinvoice/";
-            var responseToken = await GetToken();
-
-            using (var packageClient = new HttpClient())
-            {
-                packageClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", responseToken);
-                var jsonString = invoices.ToJSONString();
-                var postContent = new StringContent(jsonString);
-                var packageResult = await packageClient.PostAsync(URL, postContent);
-                var outputMessage = await packageResult.Content.ReadAsStringAsync();
-                var httpStatusCode = packageResult.StatusCode;
-                return new(outputMessage, httpStatusCode);
-            }
+            var url = _settings.BaseUrl + "/cfs/apinvoice/";
+            await GetToken();
+            var jsonString = invoice.ToJSONString();
+            var postContent = new StringContent(jsonString);
+            var response = await _httpClient.PostAsync(url, postContent);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return new(responseContent, response.StatusCode);
         }
         catch (Exception e)
         {
-            logger.LogError(e, $"Error generating invoice: {invoices.InvoiceNumber}");
+            logger.LogError(e, $"Error generating invoice: {invoice.InvoiceNumber}.");
             dynamic errorObject = new JObject();
-            errorObject.invoice_number = invoices.InvoiceNumber;
+            errorObject.invoice_number = invoice.InvoiceNumber;
             errorObject.CAS_Returned_Messages = "Internal Error: " + e.Message;
             return new (JsonConvert.SerializeObject(errorObject), HttpStatusCode.InternalServerError);
         }
+    }
 
+    public async Task<Tuple<string, HttpStatusCode>> SearchInvoice(string invoiceNumber, string supplierNumber, string supplierSiteCode)
+    {
+        invoiceNumber.ThrowIfNullOrEmpty();
+        supplierNumber.ThrowIfNullOrEmpty();
+        supplierSiteCode.ThrowIfNullOrEmpty();
+
+        try
+        {
+            var url = $"{_settings.BaseUrl}/cfs/apinvoice/{invoiceNumber}/{supplierNumber}/{supplierSiteCode}";
+            await GetToken();
+            var response = await _httpClient.GetAsync(url);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return new(responseContent, response.StatusCode);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, $"Error searching Invoice: {invoiceNumber}, Supplier Number: {supplierNumber}, Supplier Site Code: {supplierSiteCode}.");
+            return new("Internal Error: " + e.Message, HttpStatusCode.InternalServerError);
+        }
     }
 }
 
