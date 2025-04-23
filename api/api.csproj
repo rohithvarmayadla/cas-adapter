@@ -23,12 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\client\Client.csproj">
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Model\Model.csproj">
-      <Private>True</Private>
-    </ProjectReference>
+    <ProjectReference Include="..\client\Client.csproj" />
+    <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
 
 </Project>
