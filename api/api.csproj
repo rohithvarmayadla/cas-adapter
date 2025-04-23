@@ -54,5 +54,7 @@
     <Using Include="System.Security.Claims" />
     <Using Include="System.Threading.Tasks" />
     <Using Include="Microsoft.Extensions.Logging.ILogger" Alias="ILogger" />
+    <Using Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" />
+    <Using Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
   </ItemGroup>
 </Project>
