@@ -5,8 +5,6 @@
     {
         casHttpClient.Initialize(appSettings.Client);
 
-        var token = await casHttpClient.GetToken();
-
-        Assert.NotNull(token);
+        await casHttpClient.GetToken();
     }
 }

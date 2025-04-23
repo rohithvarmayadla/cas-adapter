@@ -26,7 +26,20 @@ public class InvoiceController : Controller
             return BadRequest("Invoice data is required.");
         }
 
-        (var result, var statusCode) = await _casHttpClient.ApTransaction(invoice);
+        (var result, var statusCode) = await _casHttpClient.GenerateInvoice(invoice);
+
+        return StatusCode((int)statusCode, new JsonResult(result).Value);
+    }
+
+    [HttpGet("{invoiceNumber}/{supplierNumber}/{supplierSiteCode}")]
+    public async Task<IActionResult> Search(string invoiceNumber, string supplierNumber, string supplierSiteCode)
+    {
+        if (string.IsNullOrEmpty(invoiceNumber) || string.IsNullOrEmpty(supplierNumber) || string.IsNullOrEmpty(supplierSiteCode))
+        {
+            return BadRequest("Invoice number, supplier number, and supplier site code are required.");
+        }
+
+        (var result, var statusCode) = await _casHttpClient.SearchInvoice(invoiceNumber, supplierNumber, supplierSiteCode);
 
         return StatusCode((int)statusCode, new JsonResult(result).Value);
     }
