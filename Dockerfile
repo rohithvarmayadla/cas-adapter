@@ -10,6 +10,8 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 COPY ./api .
+COPY ./client .
+COPY ./Model .
 
 # Restore as distinct layers
 RUN dotnet restore "api.csproj"
@@ -19,6 +21,8 @@ RUN dotnet build "api.csproj" -c Release -o /app/build
 FROM build AS publish
 ARG BUILD_ID
 COPY ./api .
+COPY ./client .
+COPY ./Model .
 
 # Build and publish a release
 RUN dotnet publish "api.csproj" -c Release -o /app/publish
