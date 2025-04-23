@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>a6a87a1a-3244-4983-bfcd-dd663b9c7632</UserSecretsId>
   </PropertyGroup>
 
@@ -27,4 +28,31 @@
     <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Api" />
+    <Using Include="Client" />
+    <Using Include="IdentityModel.AspNetCore.OAuth2Introspection" />
+    <Using Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <Using Include="Microsoft.AspNetCore.Builder" />
+    <Using Include="Microsoft.AspNetCore.Hosting" />
+    <Using Include="Microsoft.AspNetCore.Http" />
+    <Using Include="Microsoft.AspNetCore.Mvc" />
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Hosting" />
+    <Using Include="Microsoft.Extensions.Logging" />
+    <Using Include="Microsoft.Extensions.Options" />
+    <Using Include="Microsoft.Extensions.Primitives" />
+    <Using Include="Microsoft.IdentityModel.Tokens" />
+    <Using Include="Model.Settings" />
+    <Using Include="Serilog" />
+    <Using Include="Serilog.Formatting.Compact" />
+    <Using Include="System" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Net.Http" />
+    <Using Include="System.Reflection" />
+    <Using Include="System.Security.Claims" />
+    <Using Include="System.Threading.Tasks" />
+    <Using Include="Microsoft.Extensions.Logging.ILogger" Alias="ILogger" />
+  </ItemGroup>
 </Project>
