@@ -125,6 +125,46 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Get Supplier By Number",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/api/Supplier/2002738",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"Supplier",
+						"2002738"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Supplier By Number And Site Code",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/api/Supplier/2002738/site/002",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"Supplier",
+						"2002738",
+						"site",
+						"002"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"auth": {

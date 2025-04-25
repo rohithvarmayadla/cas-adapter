@@ -1,5 +1,7 @@
 ﻿public class SupplierTests(ICasHttpClient casHttpClient, AppSettings appSettings)
 {
+    // WARNING these are not valid unit tests, they depend on existing data in the CAS system and will fail if the data is changed or removed
+
     [Fact]
     public async Task Get_Supplier_By_Number_Succeed()
     {
@@ -14,15 +16,13 @@
     [Fact]
     public async Task Get_Supplier_By_Number_And_Site_Code_Succeed()
     {
-        var supplierNumber = "2002741";
-        var supplierSiteCode = "001";
+        var supplierNumber = "2002738";
+        var supplierSiteCode = "002";
 
         casHttpClient.Initialize(appSettings.Client);
         var response = await casHttpClient.GetSupplierByNumberAndSiteCode(supplierNumber, supplierSiteCode);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        // successful JSON returned from CAS example
-        //{ "invoice_number":"INV-2025-026102","invoice_status":"Validated","payment_status":"Fully Paid","payment_number":"15200000023","payment_date":"17-APR-2025"}
     }
 
     [Fact]

@@ -1,5 +1,7 @@
 ﻿public class InvoiceTests(ICasHttpClient casHttpClient, AppSettings appSettings)
 {
+    // WARNING these are not valid unit tests, they depend on existing data in the CAS system and will fail if the data is changed or removed
+
     [Fact]
     public async Task Send_Invoices_Cas_Transaction_Succeed()
     {
