@@ -19,7 +19,7 @@ public class InvoiceController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Generate([FromBody] CasApTransaction invoice)
+    public async Task<IActionResult> Generate([FromBody] Invoice invoice)
     {
         if (invoice == null)
         {

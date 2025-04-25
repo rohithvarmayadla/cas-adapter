@@ -6,7 +6,7 @@ public interface ICasHttpClient
     Task<HttpStatusCode> GetToken();
     Task<Response> Get(string url);
     Task<Response> Post(string url, string payload);
-    Task<Response> CreateInvoice(CasApTransaction invoices);
+    Task<Response> CreateInvoice(Invoice invoices);
     Task<Response> GetInvoice(string invoiceNumber, string supplierNumber, string supplierSiteCode);
     Task<Response> GetPayment(string paymentNumber, string payGroup);
 

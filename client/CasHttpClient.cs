@@ -70,7 +70,7 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
         return new(responseContent, response.StatusCode);
     }
 
-    public async Task<Response> CreateInvoice(CasApTransaction invoice)
+    public async Task<Response> CreateInvoice(Invoice invoice)
     {
         invoice.ThrowIfNull();
 

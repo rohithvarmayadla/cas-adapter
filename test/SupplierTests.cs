@@ -1,6 +1,17 @@
 ﻿public class SupplierTests(ICasHttpClient casHttpClient, AppSettings appSettings)
 {
     [Fact]
+    public async Task Get_Supplier_By_Number_Succeed()
+    {
+        var supplierNumber = "2002738";
+
+        casHttpClient.Initialize(appSettings.Client);
+        var response = await casHttpClient.GetSupplierByNumber(supplierNumber);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Get_Supplier_By_Number_And_Site_Code_Succeed()
     {
         var supplierNumber = "2002741";

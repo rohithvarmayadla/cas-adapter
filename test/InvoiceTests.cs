@@ -3,7 +3,7 @@
     [Fact]
     public async Task Send_Invoices_Cas_Transaction_Succeed()
     {
-        var invoices = new CasApTransaction();
+        var invoices = new Invoice();
         invoices.IsBlockSupplier = true;
         invoices.InvoiceType = "Standard";
         invoices.SupplierNumber = "2002741";
@@ -33,9 +33,9 @@
         invoices.GLDate = DateTime.Now;
         invoices.InvoiceBatchName = "SNBATCH";
         invoices.CurrencyCode = "CAD";
-        invoices.InvoiceLineDetails = new List<CasApTransactionInvoiceLineDetail>
+        invoices.InvoiceLineDetails = new List<InvoiceLineDetail>
         {
-            new CasApTransactionInvoiceLineDetail
+            new InvoiceLineDetail
             {
                 InvoiceLineNumber = 1,
                 InvoiceLineType = "Item",

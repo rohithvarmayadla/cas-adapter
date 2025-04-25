@@ -1,4 +1,4 @@
-﻿public class CasApTransactionInvoiceLineDetail
+﻿public class InvoiceLineDetail
 {
     public int InvoiceLineNumber { get; set; }
 

@@ -1,4 +1,4 @@
-﻿public class CasApTransaction
+﻿public class Invoice
 {
     public bool IsBlockSupplier { get; set; }
 
@@ -124,7 +124,7 @@
 
     public string? EmailAddress { get; set; }
 
-    public List<CasApTransactionInvoiceLineDetail> InvoiceLineDetails { get; set; }
+    public List<InvoiceLineDetail> InvoiceLineDetails { get; set; }
 
     public string ToJSONString()
     {
