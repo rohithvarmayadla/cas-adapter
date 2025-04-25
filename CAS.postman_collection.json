@@ -1,0 +1,162 @@
+{
+	"info": {
+		"_postman_id": "1909d1e3-7e10-4074-8e20-6a81cd2d3753",
+		"name": "CAS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "730057"
+	},
+	"item": [
+		{
+			"name": "CASAPRetrieve",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Get Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "dfa-cas-api-gateway-6006",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "********",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://dev.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token",
+					"protocol": "https",
+					"host": [
+						"dev",
+						"loginproxy",
+						"gov",
+						"bc",
+						"ca"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"standard",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Generate Invoice",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n \"invoiceType\": \"Standard\",\r\n \"supplierNumber\": \"2000428\",\r\n \"supplierSiteNumber\": \"001\",\r\n \"invoiceDate\": \"2025-04-17\",\r\n \"invoiceNumber\": \"INV-2025-026102\",\r\n \"invoiceAmount\": 284.00,\r\n \"payGroup\": \"GEN CHQ\",\r\n \"dateInvoiceReceived\": \"2025-04-17\",\r\n //\"dateGoodsReceived\": \"\",\r\n \"remittanceCode\": \"01\",\r\n \"specialHandling\": false,\r\n \"nameLine1\": \"Ida Albert\",\r\n \"nameLine2\": \"\",\r\n \"addressLine1\": \"2671 Champions Lounge\",\r\n \"addressLine2\": \"30\",\r\n \"addressLine3\": \"Galaxy Studios\",\r\n \"city\": \"Chilliwack\",\r\n \"country\": \"CA\",\r\n \"province\": \"BC\",\r\n \"postalCode\": \"V4R9M0\",\r\n \"qualifiedReceiver\": \"systemuser\",\r\n \"terms\": \"Immediate\",\r\n \"payAloneFlag\": \"Y\",\r\n \"paymentAdviceComments\": \"\",\r\n \"remittanceMessage1\": \"21-03304-VIC-Albert, Ida\",\r\n \"remittanceMessage2\": \"Income Support-Lost Earning Capacity-Minimum Wage\",\r\n \"remittanceMessage3\": \"Crime Victim Assistance Program\",\r\n \"glDate\": \"2025-04-17\",\r\n \"invoiceBatchName\": \"SNBATCH\",\r\n \"currencyCode\": \"CAD\",\r\n \"invoiceLineDetails\": [{\r\n   \"invoiceLineNumber\": 1,\r\n   \"invoiceLineType\": \"Item\",\r\n   \"lineCode\": \"DR\",\r\n   \"invoiceLineAmount\": 284.00,\r\n   \"defaultDistributionAccount\": \"010.15004.10250.5298.1500000.000000.0000\",\r\n   \"description\": \"\",\r\n   \"taxClassificationCode\": \"\",\r\n   \"distributionSupplier\": \"\",\r\n   \"info1\": \"\",\r\n   \"info2\": \"\",\r\n   \"info3\": \"\"\r\n   }]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}/api/Invoice",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"Invoice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "HealthCheck Ready",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/ready",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"ready"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Invoice",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/api/Invoice/INV-2025-026102/2000428/001",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"Invoice",
+						"INV-2025-026102",
+						"2000428",
+						"001"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJxUWlFWDB2T2Z1SlBuWUw4MWo0Q2tDOHVPdEJ1aFZvM0xBd2ppczZWbHRzIn0.eyJleHAiOjE3NDU1MTUwOTAsImlhdCI6MTc0NTUxNDc5MCwianRpIjoiZmVmYTZlMzgtMDg0Yy00NTUwLTkwYmQtYjk3MWI1MGY0MDAwIiwiaXNzIjoiaHR0cHM6Ly9kZXYubG9naW5wcm94eS5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvc3RhbmRhcmQiLCJhdWQiOiJkZmEtY2FzLWFwaS1nYXRld2F5LTYwMDYiLCJzdWIiOiJzZXJ2aWNlLWFjY291bnQtZGZhLWNhcy1hcGktZ2F0ZXdheS02MDA2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGZhLWNhcy1hcGktZ2F0ZXdheS02MDA2Iiwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiY2xpZW50SG9zdCI6IjE0Mi4yOS4xOTYuMTc2IiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtZGZhLWNhcy1hcGktZ2F0ZXdheS02MDA2Iiwic2Vzc2lvbl9zdGF0ZSI6IjQzOTljNDlhLWI1OTQtNGE4Yi1hM2M0LWNmZDk4ODg5MGE4YyIsImNsaWVudEFkZHJlc3MiOiIxNDIuMjkuMTk2LjE3NiIsImNsaWVudF9pZCI6ImRmYS1jYXMtYXBpLWdhdGV3YXktNjAwNiJ9.nLCWIVVUFysnPNzAWiAFSdAlCh2jbMgIMEVNhGwS5ARcw_B29_XHHc0kv1q2jIMoF0Eav-G2KE3w729411YvXqW6z0X9sNybyj0IJUtA6OoPsTjHP6NcRYK0hLcmXrs39dul4ARHtdq70lbl0FyNPGth-F-1LiMnUdnOAqsLbDKRiBv8in1hVAMd2w2B9uO1A4Cbn00ysY2sn7s4hQnJG5xpOOMG3LLM2ErkMqigJE5C_Gft8N4hpWUj9a2TIZQ6hIffcvDn7nv73vFXqlYDc4E_sjQqJ-PAxwU84hJipfOCH0a0N7reERQpVb9PlQGw9ehAT5LvyHMoFBNgTaIlmw",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

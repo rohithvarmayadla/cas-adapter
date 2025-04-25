@@ -63,6 +63,7 @@ public static class SerilogSplunkLoggingExtensions
     {
         webApplication.UseSerilogRequestLogging(opts =>
         {
+            opts.GetLevel = GetLevel;
             opts.IncludeQueryInRequestPath = true;
             opts.EnrichDiagnosticContext = (diagCtx, httpCtx) =>
             {
@@ -78,4 +79,28 @@ public static class SerilogSplunkLoggingExtensions
             .WriteTo.Console()
             .CreateBootstrapLogger();
     }
+
+    private static bool IsHealthCheckEndpoint(HttpContext ctx)
+    {
+        var endpoint = ctx.GetEndpoint();
+        if (endpoint is object) // same as !(endpoint is null)
+        {
+            return string.Equals(
+                endpoint.DisplayName,
+                "Health checks",
+                StringComparison.Ordinal);
+        }
+        // No endpoint, so not a health check endpoint
+        return false;
+    }
+
+    // summary logs for health check requests use a Verbose level, while errors use Error and other requests use Information
+    private static LogEventLevel GetLevel(HttpContext ctx, double _, Exception ex) =>
+        ex != null
+            ? LogEventLevel.Error
+            : ctx.Response.StatusCode > 499
+                ? LogEventLevel.Error
+                : IsHealthCheckEndpoint(ctx) // Not an error, check if it was a health check
+                    ? LogEventLevel.Verbose // Was a health check, use Verbose
+                    : LogEventLevel.Information;
 }

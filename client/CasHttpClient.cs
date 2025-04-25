@@ -4,6 +4,8 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
 {
     private HttpClient _httpClient = null;
     private Model.Settings.Client _settings = null;
+    private string _invoiceBaseUrl => $"{_settings.BaseUrl}/cfs/apinvoice/";
+    private string _supplierBaseUrl => $"{_settings.BaseUrl}/cfs/supplier/";
 
     // TODO this will be removed when "Access Token Management" ticket is completed
     public void Initialize(Model.Settings.Client settings)
@@ -18,7 +20,7 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
     }
 
     // get authentication bearer token for subsequent requests
-    public async Task GetToken()
+    public async Task<HttpStatusCode> GetToken()
     {
         try
         {
@@ -31,12 +33,16 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
 
             var response = await _httpClient.SendAsync(request);
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            response.EnsureSuccessStatusCode();
-
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError($"Error getting token: {response.StatusCode} - {response.Content}");
+                return response.StatusCode;
+            }
             string responseBody = await response.Content.ReadAsStringAsync();
             var jo = JObject.Parse(responseBody);
             var bearerToken = jo["access_token"].ToString();
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+            return HttpStatusCode.OK;
         }
         catch (Exception e)
         {
@@ -45,19 +51,33 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
         }
     }
 
-    public async Task<Tuple<string, HttpStatusCode>> GenerateInvoice(CasApTransaction invoice)
+    public async Task<Response> Get(string url)
+    {
+        await GetToken()
+            .ThrowIfNotSuccessful();
+        var response = await _httpClient.GetAsync(url);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        return new Response(responseContent, response.StatusCode);
+    }
+
+    public async Task<Response> Post(string url, string payload)
+    {
+        await GetToken()
+            .ThrowIfNotSuccessful();
+        var postContent = new StringContent(payload);
+        var response = await _httpClient.PostAsync(url, postContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        return new(responseContent, response.StatusCode);
+    }
+
+    public async Task<Response> CreateInvoice(CasApTransaction invoice)
     {
         invoice.ThrowIfNull();
 
         try
         {
-            var url = _settings.BaseUrl + "/cfs/apinvoice/";
-            await GetToken();
             var jsonString = invoice.ToJSONString();
-            var postContent = new StringContent(jsonString);
-            var response = await _httpClient.PostAsync(url, postContent);
-            var responseContent = await response.Content.ReadAsStringAsync();
-            return new(responseContent, response.StatusCode);
+            return await Post(_invoiceBaseUrl, jsonString);
         }
         catch (Exception e)
         {
@@ -69,7 +89,7 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
         }
     }
 
-    public async Task<Tuple<string, HttpStatusCode>> SearchInvoice(string invoiceNumber, string supplierNumber, string supplierSiteCode)
+    public async Task<Response> GetInvoice(string invoiceNumber, string supplierNumber, string supplierSiteCode)
     {
         invoiceNumber.ThrowIfNullOrEmpty();
         supplierNumber.ThrowIfNullOrEmpty();
@@ -77,19 +97,76 @@ public class CasHttpClient(ILogger<CasHttpClient> logger) : ICasHttpClient
 
         try
         {
-            var url = $"{_settings.BaseUrl}/cfs/apinvoice/{invoiceNumber}/{supplierNumber}/{supplierSiteCode}";
-            await GetToken();
-            var response = await _httpClient.GetAsync(url);
-            var responseContent = await response.Content.ReadAsStringAsync();
-            return new(responseContent, response.StatusCode);
+            var url = $"{_invoiceBaseUrl}{invoiceNumber}/{supplierNumber}/{supplierSiteCode}";
+            return await Get(url);
         }
         catch (Exception e)
         {
             logger.LogError(e, $"Error searching Invoice: {invoiceNumber}, Supplier Number: {supplierNumber}, Supplier Site Code: {supplierSiteCode}.");
+            return new Response(e.Message, HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<Response> GetPayment(string paymentNumber, string payGroup)
+    {
+        paymentNumber.ThrowIfNullOrEmpty();
+        payGroup.ThrowIfNullOrEmpty();
+
+        try
+        {
+            var url = $"{_invoiceBaseUrl}payment/{paymentNumber}/{payGroup}";
+            return await Get(url);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, $"Error searching for payment, Payment Number: {paymentNumber}, Pay Group: {payGroup}.");
+            return new Response(e.Message, HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<Response> GetSupplierByNumber(string supplierNumber)
+    {
+        supplierNumber.ThrowIfNullOrEmpty();
+
+        try
+        {
+            var url = $"{_supplierBaseUrl}{supplierNumber}";
+            return await Get(url);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, $"Error searching Supplier By Number and Site Code, Supplier Number : {supplierNumber}.");
             return new("Internal Error: " + e.Message, HttpStatusCode.InternalServerError);
         }
     }
+
+    public async Task<Response> GetSupplierByNumberAndSiteCode(string supplierNumber, string supplierSiteCode)
+    {
+        supplierNumber.ThrowIfNullOrEmpty();
+        supplierSiteCode.ThrowIfNullOrEmpty();
+
+        try
+        {
+            var url = $"{_supplierBaseUrl}{supplierNumber}/site/{supplierSiteCode}";
+            return await Get(url);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, $"Error searching Supplier By Number and Site Code, Supplier Number : {supplierNumber}, Supplier Site Code: {supplierSiteCode}.");
+            return new("Internal Error: " + e.Message, HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<Response> GetSupplierByName(string supplierName)
+    {
+        supplierName.ThrowIfNullOrEmpty();
+        // TODO validate at least 4 characters but first if CAS does this already
+        var url = $"{_settings.BaseUrl}/cfs/suppliersearch/{supplierName}";
+        return await Get(url);
+    }
 }
+
+public record Response(string Content, HttpStatusCode StatusCode);
 
 //public static class CasHttpClientExtensions
 //{

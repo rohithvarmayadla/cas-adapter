@@ -46,6 +46,7 @@
     <Using Include="Microsoft.IdentityModel.Tokens" />
     <Using Include="Model.Settings" />
     <Using Include="Serilog" />
+    <Using Include="Serilog.Events" />
     <Using Include="Serilog.Formatting.Compact" />
     <Using Include="System" />
     <Using Include="System.Linq" />
@@ -56,5 +57,6 @@
     <Using Include="Microsoft.Extensions.Logging.ILogger" Alias="ILogger" />
     <Using Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" />
     <Using Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+    
   </ItemGroup>
 </Project>

@@ -26,7 +26,7 @@ public class InvoiceController : Controller
             return BadRequest("Invoice data is required.");
         }
 
-        (var result, var statusCode) = await _casHttpClient.GenerateInvoice(invoice);
+        (var result, var statusCode) = await _casHttpClient.CreateInvoice(invoice);
 
         return StatusCode((int)statusCode, new JsonResult(result).Value);
     }
@@ -39,7 +39,7 @@ public class InvoiceController : Controller
             return BadRequest("Invoice number, supplier number, and supplier site code are required.");
         }
 
-        (var result, var statusCode) = await _casHttpClient.SearchInvoice(invoiceNumber, supplierNumber, supplierSiteCode);
+        (var result, var statusCode) = await _casHttpClient.GetInvoice(invoiceNumber, supplierNumber, supplierSiteCode);
 
         return StatusCode((int)statusCode, new JsonResult(result).Value);
     }

@@ -5,6 +5,8 @@
     {
         casHttpClient.Initialize(appSettings.Client);
 
-        await casHttpClient.GetToken();
+        var statusCode = await casHttpClient.GetToken();
+
+        Assert.Equal(HttpStatusCode.OK, statusCode);
     }
 }

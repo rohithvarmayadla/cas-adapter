@@ -17,4 +17,10 @@ public static class ArgumentExtensions
             throw new ArgumentNullException(message ?? $"Argument was null or empty.");
         }
     }
+
+    public static async Task ThrowIfNotSuccessful(this Task<HttpStatusCode> statusCode)
+    {
+        if (await statusCode != HttpStatusCode.OK)
+            throw new HttpRequestException($"Request failed with status code: {statusCode}");
+    }
 }
