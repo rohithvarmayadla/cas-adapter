@@ -40,7 +40,7 @@
 					]
 				},
 				"url": {
-					"raw": "https://dev.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token",
+					"raw": "********/auth/realms/standard/protocol/openid-connect/token",
 					"protocol": "https",
 					"host": [
 						"dev",
@@ -172,7 +172,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJxUWlFWDB2T2Z1SlBuWUw4MWo0Q2tDOHVPdEJ1aFZvM0xBd2ppczZWbHRzIn0.eyJleHAiOjE3NDU1MTUwOTAsImlhdCI6MTc0NTUxNDc5MCwianRpIjoiZmVmYTZlMzgtMDg0Yy00NTUwLTkwYmQtYjk3MWI1MGY0MDAwIiwiaXNzIjoiaHR0cHM6Ly9kZXYubG9naW5wcm94eS5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvc3RhbmRhcmQiLCJhdWQiOiJkZmEtY2FzLWFwaS1nYXRld2F5LTYwMDYiLCJzdWIiOiJzZXJ2aWNlLWFjY291bnQtZGZhLWNhcy1hcGktZ2F0ZXdheS02MDA2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGZhLWNhcy1hcGktZ2F0ZXdheS02MDA2Iiwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiY2xpZW50SG9zdCI6IjE0Mi4yOS4xOTYuMTc2IiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtZGZhLWNhcy1hcGktZ2F0ZXdheS02MDA2Iiwic2Vzc2lvbl9zdGF0ZSI6IjQzOTljNDlhLWI1OTQtNGE4Yi1hM2M0LWNmZDk4ODg5MGE4YyIsImNsaWVudEFkZHJlc3MiOiIxNDIuMjkuMTk2LjE3NiIsImNsaWVudF9pZCI6ImRmYS1jYXMtYXBpLWdhdGV3YXktNjAwNiJ9.nLCWIVVUFysnPNzAWiAFSdAlCh2jbMgIMEVNhGwS5ARcw_B29_XHHc0kv1q2jIMoF0Eav-G2KE3w729411YvXqW6z0X9sNybyj0IJUtA6OoPsTjHP6NcRYK0hLcmXrs39dul4ARHtdq70lbl0FyNPGth-F-1LiMnUdnOAqsLbDKRiBv8in1hVAMd2w2B9uO1A4Cbn00ysY2sn7s4hQnJG5xpOOMG3LLM2ErkMqigJE5C_Gft8N4hpWUj9a2TIZQ6hIffcvDn7nv73vFXqlYDc4E_sjQqJ-PAxwU84hJipfOCH0a0N7reERQpVb9PlQGw9ehAT5LvyHMoFBNgTaIlmw",
+				"value": "********",
 				"type": "string"
 			}
 		]
