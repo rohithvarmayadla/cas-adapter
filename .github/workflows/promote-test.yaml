@@ -1,0 +1,32 @@
+name: Promote Image to Test
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY_URL: ${{ vars.REGISTRY_URL }}
+  OPENSHIFT_SERVER_URL: ${{ vars.OPENSHIFT_SERVER_URL }}
+  IMAGE_NAMESPACE: ${{ vars.IMAGE_NAMESPACE }}
+  IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+  BUILD_TAG: dev
+  TARGET_TAG: test
+
+jobs:
+  promote-to-test:
+    name: Promote Dev to Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install oc CLI
+        uses: redhat-actions/oc-installer@v1
+
+      - name: Login to OpenShift
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ env.OPENSHIFT_SERVER_URL }}
+          username: ${{ secrets.OPENSHIFT_USERNAME }}
+          password: ${{ secrets.OPENSHIFT_PASSWORD }}
+
+      - name: Promote Image from latest to test
+        run: |
+          oc tag $IMAGE_NAMESPACE/$IMAGE_NAME:$BUILD_TAG $IMAGE_NAMESPACE/$IMAGE_NAME:$TARGET_TAG
